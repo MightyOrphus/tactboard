@@ -1,12 +1,16 @@
 <template>
   <div v-bind:id="id" class="dateCol" @dragovere.prevent @drop.prevent="drop">
     <div id="header">{{ date }}</div>
-    <slot />
+    <Card v-for="task in tasks" v-bind:key="task.issueId"></Card>
   </div>
 </template>
 <script>
+import Card from "./Card.vue";
 export default {
-  props: ["id", "date"],
+  props: { id: String, date: String, tasks: Array },
+  components: {
+    Card,
+  },
   methods: {
     drop: (e) => {
       const card_id = e.dataTransfer.getData("card_id");

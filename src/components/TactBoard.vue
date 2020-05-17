@@ -19,15 +19,16 @@
       </div>
       <div>
         <label>JIRA csv: </label>
-        <input type="file" id="input" multiple />
+        <input type="file" id="csvFileInput" multiple />
       </div>
-      <button v-on:click="drawABoard">Draw A Board</button>
+      <button v-on:click="processCSVFile">Draw A Board</button>
     </div>
     <div id="board" class="flexbox">
       <DateCol
         v-for="date in allDatesInSprint"
         v-bind:key="date.dateNum"
         v-bind:date="date.dateVal"
+        v-bind:tasks="date.tasks"
         class="dateCol"
       ></DateCol>
     </div>
@@ -36,17 +37,25 @@
 
 <script>
 import DateCol from "./DateCol.vue";
-// import Card from "./Card.vue";
 export default {
   mounted: function() {
     this.initStartDate();
   },
   components: {
     DateCol,
-    // Card,
   },
   data: function() {
-    return { allDatesInSprint: new Array(), jiraContent: "" };
+    return {
+      allDatesInSprint: new Array(),
+      numberOfHoursInOneDayPerPerson: 6,
+      taskGroupByDate: {},
+      hourInSecond: 3600,
+    };
+  },
+  watch: {
+    taskGroupByDate: function() {
+      this.drawABoard(this.taskGroupByDate);
+    },
   },
   methods: {
     initStartDate() {
@@ -65,13 +74,14 @@ export default {
         ("0" + m.getUTCDate()).slice(-2)
       );
     },
-    setAllDatesInSprint(startDate, endDate) {
+    setAllDatesInSprint(startDate, endDate, taskGroupByDate) {
       this.allDatesInSprint = new Array();
       var dateHolder = new Date(startDate.getTime());
       var dateNum = 1;
       while (dateHolder < endDate) {
         if (dateHolder.getDay != 6 && dateHolder.getDay() != 0) {
           this.allDatesInSprint.push({
+            tasks: taskGroupByDate[dateNum],
             dateNum: dateNum++,
             dateVal: this.formatDate(new Date(dateHolder)),
           });
@@ -94,14 +104,104 @@ export default {
 
       return [day, month, year].join("-");
     },
-    drawABoard() {
+    drawABoard(taskGroupByDate) {
       var startDate = new Date(document.getElementById("startDate").value);
       var numberOfWeeks = document.getElementById("sprintRange").value;
       var endDate = this.findEndDate(startDate, numberOfWeeks);
-      this.setAllDatesInSprint(startDate, endDate);
-      console.log();
+      this.setAllDatesInSprint(startDate, endDate, taskGroupByDate);
     },
-    readFileAsString() {},
+    processCSVFile() {
+      var inputFile = document.getElementById("csvFileInput").files[0];
+
+      if (!inputFile) {
+        alert("No input file selected.");
+        return;
+      }
+
+      var reader = new FileReader();
+      var that = this;
+      reader.onload = function(event) {
+        var fileContent = that.CSVToArray(event.target.result);
+        that.distributeTaskToDate(that.groupByParent(fileContent));
+      };
+      reader.readAsText(inputFile);
+    },
+    randomColor() {
+      return (
+        "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6)
+      );
+    },
+    groupByParent(fileContent) {
+      var result = {};
+      var headers = fileContent.shift();
+      var parentIssueIdx = headers.indexOf("Parent id");
+      var sumIdx = headers.indexOf("Summary");
+      var issueIdIdx = headers.indexOf("Issue id");
+      var orgEstIdx = headers.indexOf("Original Estimate");
+      var issueTypeIdx = headers.indexOf("Issue Type");
+
+      var someRandomColor = this.randomColor();
+      for (var lineNum = 0; lineNum < fileContent.length; lineNum++) {
+        var line = fileContent[lineNum];
+
+        if (!line[parentIssueIdx]) continue;
+        // random new color when parent issue change...
+        if (parentId && parentId !== line[parentIssueIdx])
+          someRandomColor = this.randomColor();
+        var parentId = line[parentIssueIdx];
+        var taskObj = {
+          summary: line[sumIdx],
+          issueId: line[issueIdIdx],
+          oriEst: this.toHour(line[orgEstIdx]),
+          type: line[issueTypeIdx],
+          color: someRandomColor,
+        };
+        if (result[parentId]) {
+          result[parentId].push(taskObj);
+        } else {
+          result[parentId] = new Array(taskObj);
+        }
+      }
+      return result;
+    },
+    toHour(second) {
+      return Math.floor(second / this.hourInSecond);
+    },
+    distributeTaskToDate(tasksGroupByParent) {
+      var taskGroupByDate = new Array();
+      var parentIds = Object.keys(tasksGroupByParent);
+      var numberOfDev = document.getElementById("numOfDev").value;
+      var possibleHoursInOneDay =
+        this.numberOfHoursInOneDayPerPerson * numberOfDev;
+
+      var currentDate = new Array();
+      var remainingHours = possibleHoursInOneDay;
+
+      for (var i = 0; i < parentIds.length; i++) {
+        var parentId = parentIds[i];
+        var tasks = tasksGroupByParent[parentId];
+        tasks.forEach(function(task) {
+          while (task.oriEst !== 0) {
+            if (task.oriEst <= remainingHours) {
+              remainingHours = remainingHours - task.oriEst;
+              currentDate.push(task);
+              task.oriEst = 0;
+            } else if (task.oriEst > remainingHours) {
+              task.oriEst = task.oriEst - remainingHours;
+              currentDate.push(task);
+              remainingHours = 0;
+            }
+
+            if (remainingHours === 0) {
+              taskGroupByDate.push(new Array(currentDate));
+              remainingHours = possibleHoursInOneDay;
+              currentDate = new Array();
+            }
+          }
+        });
+      }
+      this.taskGroupByDate = taskGroupByDate;
+    },
     CSVToArray(strData, strDelimiter) {
       // Check to see if the delimiter is defined. If not,
       // then default to comma.
@@ -178,7 +278,8 @@ export default {
 <style scoped>
 #inputForm {
   width: 350px;
-  padding: 15px;
+  margin: 10px;
+  padding: 5px;
   background-color: var(--backgrounds-3-hex);
   border-style: groove;
   border-color: black;
@@ -197,7 +298,6 @@ button {
   height: 100vh;
 
   overflow: auto;
-  padding: 15px;
 }
 
 .flexbox .dateCol {
