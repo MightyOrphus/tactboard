@@ -26,9 +26,9 @@
     <div id="board" class="flexbox">
       <DateCol
         v-for="date in allDatesInSprint"
-        v-bind:key="date.dateNum"
-        v-bind:date="date.dateVal"
-        v-bind:tasks="date.tasks"
+        :key="date.dateNum"
+        :date="date.dateVal"
+        :tasks="date.tasks"
         class="dateCol"
       ></DateCol>
     </div>
@@ -48,13 +48,13 @@ export default {
     return {
       allDatesInSprint: new Array(),
       numberOfHoursInOneDayPerPerson: 6,
-      taskGroupByDate: {},
+      tasksGroupByDate: {},
       hourInSecond: 3600,
     };
   },
   watch: {
-    taskGroupByDate: function() {
-      this.drawABoard(this.taskGroupByDate);
+    tasksGroupByDate: function() {
+      this.drawABoard(this.tasksGroupByDate);
     },
   },
   methods: {
@@ -74,14 +74,15 @@ export default {
         ("0" + m.getUTCDate()).slice(-2)
       );
     },
-    setAllDatesInSprint(startDate, endDate, taskGroupByDate) {
+    setAllDatesInSprint(startDate, endDate, tasksGroupByDate) {
       this.allDatesInSprint = new Array();
       var dateHolder = new Date(startDate.getTime());
       var dateNum = 1;
       while (dateHolder < endDate) {
         if (dateHolder.getDay != 6 && dateHolder.getDay() != 0) {
+          var tasksInDate = tasksGroupByDate[dateNum];
           this.allDatesInSprint.push({
-            tasks: taskGroupByDate[dateNum],
+            tasks: [...tasksInDate],
             dateNum: dateNum++,
             dateVal: this.formatDate(new Date(dateHolder)),
           });
@@ -104,13 +105,14 @@ export default {
 
       return [day, month, year].join("-");
     },
-    drawABoard(taskGroupByDate) {
+    drawABoard(tasksGroupByDate) {
       var startDate = new Date(document.getElementById("startDate").value);
       var numberOfWeeks = document.getElementById("sprintRange").value;
       var endDate = this.findEndDate(startDate, numberOfWeeks);
-      this.setAllDatesInSprint(startDate, endDate, taskGroupByDate);
+      this.setAllDatesInSprint(startDate, endDate, tasksGroupByDate);
     },
     processCSVFile() {
+      console.log("processCSVFile...");
       var inputFile = document.getElementById("csvFileInput").files[0];
 
       if (!inputFile) {
@@ -122,7 +124,8 @@ export default {
       var that = this;
       reader.onload = function(event) {
         var fileContent = that.CSVToArray(event.target.result);
-        that.distributeTaskToDate(that.groupByParent(fileContent));
+        var tasksGroupByParent = that.groupByParent(fileContent);
+        that.tasksGroupByDate = that.distributeTasksToDate(tasksGroupByParent);
       };
       reader.readAsText(inputFile);
     },
@@ -137,6 +140,7 @@ export default {
       var parentIssueIdx = headers.indexOf("Parent id");
       var sumIdx = headers.indexOf("Summary");
       var issueIdIdx = headers.indexOf("Issue id");
+      var issueKeyIdx = headers.indexOf("Issue key");
       var orgEstIdx = headers.indexOf("Original Estimate");
       var issueTypeIdx = headers.indexOf("Issue Type");
 
@@ -152,6 +156,7 @@ export default {
         var taskObj = {
           summary: line[sumIdx],
           issueId: line[issueIdIdx],
+          issueKey: line[issueKeyIdx],
           oriEst: this.toHour(line[orgEstIdx]),
           type: line[issueTypeIdx],
           color: someRandomColor,
@@ -167,10 +172,11 @@ export default {
     toHour(second) {
       return Math.floor(second / this.hourInSecond);
     },
-    distributeTaskToDate(tasksGroupByParent) {
-      var taskGroupByDate = new Array();
+    distributeTasksToDate(tasksGroupByParent) {
+      var tasksGroupByDate = new Array();
       var parentIds = Object.keys(tasksGroupByParent);
       var numberOfDev = document.getElementById("numOfDev").value;
+
       var possibleHoursInOneDay =
         this.numberOfHoursInOneDayPerPerson * numberOfDev;
 
@@ -181,26 +187,27 @@ export default {
         var parentId = parentIds[i];
         var tasks = tasksGroupByParent[parentId];
         tasks.forEach(function(task) {
-          while (task.oriEst !== 0) {
-            if (task.oriEst <= remainingHours) {
-              remainingHours = remainingHours - task.oriEst;
+          var originalEst = task.oriEst;
+          while (originalEst !== 0) {
+            if (originalEst <= remainingHours) {
+              remainingHours = remainingHours - originalEst;
               currentDate.push(task);
-              task.oriEst = 0;
-            } else if (task.oriEst > remainingHours) {
-              task.oriEst = task.oriEst - remainingHours;
+              originalEst = 0;
+            } else if (originalEst > remainingHours) {
+              originalEst = originalEst - remainingHours;
               currentDate.push(task);
               remainingHours = 0;
             }
 
             if (remainingHours === 0) {
-              taskGroupByDate.push(new Array(currentDate));
+              tasksGroupByDate.push([...currentDate]);
               remainingHours = possibleHoursInOneDay;
               currentDate = new Array();
             }
           }
         });
       }
-      this.taskGroupByDate = taskGroupByDate;
+      return tasksGroupByDate;
     },
     CSVToArray(strData, strDelimiter) {
       // Check to see if the delimiter is defined. If not,
@@ -298,17 +305,5 @@ button {
   height: 100vh;
 
   overflow: auto;
-}
-
-.flexbox .dateCol {
-  background-color: var(--backgrounds-3-hex);
-  border-style: groove;
-  border-color: black;
-  margin-left: 10px;
-  min-width: 100px;
-}
-
-.flexbox .dateCol .card {
-  background-color: var(--backgrounds-2-hex);
 }
 </style>

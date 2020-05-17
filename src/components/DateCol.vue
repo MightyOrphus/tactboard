@@ -1,7 +1,14 @@
 <template>
   <div v-bind:id="id" class="dateCol" @dragovere.prevent @drop.prevent="drop">
     <div id="header">{{ date }}</div>
-    <Card v-for="task in tasks" v-bind:key="task.issueId"></Card>
+    <Card
+      v-for="task in tasks"
+      v-bind:key="task.issueId"
+      :color="task.color"
+      :summary="task.summary"
+      draggable="true"
+    >
+    </Card>
   </div>
 </template>
 <script>
@@ -28,5 +35,13 @@ export default {
   font-size: 20px;
   text-align: center;
   background-color: var(--backgrounds-2-hex);
+}
+
+.dateCol {
+  background-color: var(--backgrounds-3-hex);
+  border-style: groove;
+  border-color: black;
+  margin-left: 10px;
+  min-width: 100px;
 }
 </style>
