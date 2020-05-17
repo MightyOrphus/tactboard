@@ -112,7 +112,6 @@ export default {
       this.setAllDatesInSprint(startDate, endDate, tasksGroupByDate);
     },
     processCSVFile() {
-      console.log("processCSVFile...");
       var inputFile = document.getElementById("csvFileInput").files[0];
 
       if (!inputFile) {
@@ -124,10 +123,31 @@ export default {
       var that = this;
       reader.onload = function(event) {
         var fileContent = that.CSVToArray(event.target.result);
-        var tasksGroupByParent = that.groupByParent(fileContent);
+        var tasksGroupByParent = that.groupByParent([...fileContent]);
+        tasksGroupByParent = that.removeSprintLevel(
+          tasksGroupByParent,
+          fileContent
+        );
         that.tasksGroupByDate = that.distributeTasksToDate(tasksGroupByParent);
       };
       reader.readAsText(inputFile);
+    },
+    removeSprintLevel(tasksGroupByParent, fileContent) {
+      var headers = fileContent.shift();
+      var issueIdIdx = headers.indexOf("Issue id");
+      var sumIdx = headers.indexOf("Summary");
+      var sprintLvlId;
+      for (var lineNum = 0; lineNum < fileContent.length; lineNum++) {
+        var line = fileContent[lineNum];
+        var summary = line[sumIdx];
+
+        if (summary.toLowerCase().indexOf("sprint level") != -1) {
+          sprintLvlId = line[issueIdIdx];
+          break;
+        }
+      }
+      if (sprintLvlId) delete tasksGroupByParent[sprintLvlId];
+      return tasksGroupByParent;
     },
     randomColor() {
       return (

@@ -20,14 +20,14 @@ export default {
     setBackgroundColor() {
       this.$el.style.backgroundColor = this.color;
     },
-    // dragStart(e) {
-    //   const target = e.target;
-    //   e.dataTransfer.setData("card_id", target.id);
+    dragStart(e) {
+      const target = e.target;
+      e.dataTransfer.setData("card_id", target.id);
 
-    //   setTimeout(() => {
-    //     target.style.display = "none";
-    //   }, 0);
-    // },
+      setTimeout(() => {
+        target.style.display = "none";
+      }, 0);
+    },
   },
 };
 </script>
