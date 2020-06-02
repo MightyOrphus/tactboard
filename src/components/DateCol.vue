@@ -6,6 +6,7 @@
       v-bind:key="task.issueId"
       :color="task.color"
       :summary="task.summary"
+      :hoursInCurrentDate="task.hoursInCurrentDate"
       draggable="true"
     >
     </Card>
@@ -38,10 +39,10 @@ export default {
 }
 
 .dateCol {
+  display: table-cell;
   background-color: var(--backgrounds-3-hex);
   border-style: groove;
   border-color: black;
-  margin-left: 10px;
   min-width: 100px;
 }
 </style>

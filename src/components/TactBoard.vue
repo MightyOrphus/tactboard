@@ -211,10 +211,12 @@ export default {
           while (originalEst !== 0) {
             if (originalEst <= remainingHours) {
               remainingHours = remainingHours - originalEst;
+              task.hoursInCurrentDate = originalEst;
               currentDate.push(task);
               originalEst = 0;
             } else if (originalEst > remainingHours) {
               originalEst = originalEst - remainingHours;
+              task.hoursInCurrentDate = remainingHours;
               currentDate.push(task);
               remainingHours = 0;
             }
@@ -318,10 +320,7 @@ button {
 }
 
 .flexbox {
-  display: flex;
-  /* justify-content: space-between; */
-
-  /* width: 100%; */
+  display: table;
   height: 100vh;
 
   overflow: auto;

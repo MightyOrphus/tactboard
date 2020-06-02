@@ -7,12 +7,19 @@
     @dragover.stop
   >
     <p>{{ summary }}</p>
+    <p>{{ hoursInCurrentDate }}</p>
   </div>
 </template>
 
 <script>
 export default {
-  props: { id: String, draggable: String, summary: String, color: String },
+  props: {
+    id: String,
+    draggable: String,
+    summary: String,
+    color: String,
+    hoursInCurrentDate: Number,
+  },
   mounted() {
     this.setBackgroundColor();
   },
@@ -34,8 +41,8 @@ export default {
 
 <style scoped>
 .card {
-  margin: 0;
-  padding: 0;
-  border-bottom: black;
+  max-width: 200px;
+  border-bottom: groove black;
+  padding: 5px;
 }
 </style>
