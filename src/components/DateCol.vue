@@ -1,21 +1,28 @@
 <template>
   <div v-bind:id="id" class="dateCol" @dragovere.prevent @drop.prevent="drop">
     <div id="header">{{ date }}</div>
-    <Card
-      v-for="task in tasks"
-      v-bind:key="task.issueId"
-      :color="task.color"
-      :summary="task.summary"
-      :hoursInCurrentDate="task.hoursInCurrentDate"
-      draggable="true"
-    >
-    </Card>
+    <div v-if="isWorkDay">
+      <Card
+        v-for="task in tasks"
+        v-bind:key="task.issueId"
+        :color="task.color"
+        :summary="task.summary"
+        :hoursInCurrentDate="task.hoursInCurrentDate"
+        draggable="true"
+      >
+      </Card>
+    </div>
   </div>
 </template>
 <script>
 import Card from "./Card.vue";
 export default {
-  props: { id: String, date: String, tasks: Array },
+  props: {
+    id: String,
+    date: String,
+    tasks: Array,
+    isWorkDay: Boolean,
+  },
   components: {
     Card,
   },

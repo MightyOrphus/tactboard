@@ -29,6 +29,7 @@
         :key="date.dateNum"
         :date="date.dateVal"
         :tasks="date.tasks"
+        :isWorkDay="date.isWorkDay"
         class="dateCol"
       ></DateCol>
     </div>
@@ -77,14 +78,25 @@ export default {
     setAllDatesInSprint(startDate, endDate, tasksGroupByDate) {
       this.allDatesInSprint = new Array();
       var dateHolder = new Date(startDate.getTime());
-      var dateNum = 1;
+      var dateNum = 0;
       while (dateHolder < endDate) {
-        if (dateHolder.getDay != 6 && dateHolder.getDay() != 0) {
-          var tasksInDate = tasksGroupByDate[dateNum];
+        var isWorkDay = dateHolder.getDay() != 6 && dateHolder.getDay() != 0;
+        if (isWorkDay) {
+          var tasksInDate;
+          if (dateNum < tasksGroupByDate.length)
+            tasksInDate = [...tasksGroupByDate[dateNum]];
+          else tasksInDate = [];
           this.allDatesInSprint.push({
-            tasks: [...tasksInDate],
-            dateNum: dateNum++,
+            tasks: tasksInDate,
             dateVal: this.formatDate(new Date(dateHolder)),
+            isWorkDay: isWorkDay,
+          });
+          dateNum++;
+        } else {
+          this.allDatesInSprint.push({
+            tasks: [],
+            dateVal: this.formatDate(new Date(dateHolder)),
+            isWorkDay: isWorkDay,
           });
         }
         dateHolder.setDate(dateHolder.getDate() + 1);
@@ -108,7 +120,7 @@ export default {
     drawABoard(tasksGroupByDate) {
       var startDate = new Date(document.getElementById("startDate").value);
       var numberOfWeeks = document.getElementById("sprintRange").value;
-      var endDate = this.findEndDate(startDate, numberOfWeeks);
+      var endDate = new Date(this.findEndDate(startDate, numberOfWeeks));
       this.setAllDatesInSprint(startDate, endDate, tasksGroupByDate);
     },
     processCSVFile() {
