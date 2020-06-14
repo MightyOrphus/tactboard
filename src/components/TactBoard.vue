@@ -6,19 +6,19 @@
         <input type="date" id="startDate" format="yyyy-MM-dd" />
       </div>
       <div>
-        <label for="sprintRange">Sprint range: </label>
+        <label for="sprintRange">Sprint range:</label>
         <input type="text" id="sprintRange" value="2" />
       </div>
       <div>
-        <label for="numOfDev">Number of Dev: </label>
+        <label for="numOfDev">Number of Dev:</label>
         <input type="text" id="numOfDev" value="3" />
       </div>
       <div>
-        <label for="numOfTester">Number Of Tester: </label>
+        <label for="numOfTester">Number Of Tester (not supported yet):</label>
         <input type="text" id="numOfTester" value="1" />
       </div>
       <div>
-        <label>JIRA csv: </label>
+        <label>JIRA csv:</label>
         <input type="file" id="csvFileInput" multiple />
       </div>
       <button v-on:click="processCSVFile">Draw A Board</button>
@@ -43,20 +43,20 @@ export default {
     this.initStartDate();
   },
   components: {
-    DateCol,
+    DateCol
   },
   data: function() {
     return {
       allDatesInSprint: new Array(),
       numberOfHoursInOneDayPerPerson: 6,
       tasksGroupByDate: {},
-      hourInSecond: 3600,
+      hourInSecond: 3600
     };
   },
   watch: {
     tasksGroupByDate: function() {
       this.drawABoard(this.tasksGroupByDate);
-    },
+    }
   },
   methods: {
     initStartDate() {
@@ -89,14 +89,14 @@ export default {
           this.allDatesInSprint.push({
             tasks: tasksInDate,
             dateVal: this.formatDate(new Date(dateHolder)),
-            isWorkDay: isWorkDay,
+            isWorkDay: isWorkDay
           });
           dateNum++;
         } else {
           this.allDatesInSprint.push({
             tasks: [],
             dateVal: this.formatDate(new Date(dateHolder)),
-            isWorkDay: isWorkDay,
+            isWorkDay: isWorkDay
           });
         }
         dateHolder.setDate(dateHolder.getDate() + 1);
@@ -175,6 +175,7 @@ export default {
       var issueKeyIdx = headers.indexOf("Issue key");
       var orgEstIdx = headers.indexOf("Original Estimate");
       var issueTypeIdx = headers.indexOf("Issue Type");
+      var accountIdx = headers.indexOf("Custom field (Account)");
 
       var someRandomColor = this.randomColor();
       for (var lineNum = 0; lineNum < fileContent.length; lineNum++) {
@@ -184,19 +185,23 @@ export default {
         // random new color when parent issue change...
         if (parentId && parentId !== line[parentIssueIdx])
           someRandomColor = this.randomColor();
-        var parentId = line[parentIssueIdx];
-        var taskObj = {
-          summary: line[sumIdx],
-          issueId: line[issueIdIdx],
-          issueKey: line[issueKeyIdx],
-          oriEst: this.toHour(line[orgEstIdx]),
-          type: line[issueTypeIdx],
-          color: someRandomColor,
-        };
-        if (result[parentId]) {
-          result[parentId].push(taskObj);
-        } else {
-          result[parentId] = new Array(taskObj);
+        if (line[accountIdx].includes("FSG20")) {
+          // currently get only development task
+          // QA task scenario is wait for implemented.
+          var parentId = line[parentIssueIdx];
+          var taskObj = {
+            summary: line[sumIdx],
+            issueId: line[issueIdIdx],
+            issueKey: line[issueKeyIdx],
+            oriEst: this.toHour(line[orgEstIdx]),
+            type: line[issueTypeIdx],
+            color: someRandomColor
+          };
+          if (result[parentId]) {
+            result[parentId].push(taskObj);
+          } else {
+            result[parentId] = new Array(taskObj);
+          }
         }
       }
       return result;
@@ -311,8 +316,8 @@ export default {
 
       // Return the parsed data.
       return arrData;
-    },
-  },
+    }
+  }
 };
 </script>
 
