@@ -76,8 +76,7 @@ export default {
           else tasksInDate = [];
           this.allDatesInSprint.push({
             tasks: tasksInDate,
-            dateVal: this.formatDate(new Date(dateHolder)),
-            isWorkDay: isWorkDay
+            dateVal: this.formatDate(new Date(dateHolder))
           });
           dateNum++;
         } else {
@@ -312,7 +311,6 @@ export default {
 <style scoped>
 #inoutTab {
   width: 500px;
-  margin: 10px;
   padding: 5px;
   background-color: var(--backgrounds-3-hex);
   border-style: groove;

@@ -1,16 +1,16 @@
 <template>
-  <div v-bind:id="id" class="dateCol" @dragovere.prevent @drop.prevent="drop">
+  <div v-bind:id="id" class="dateCol" @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
     <div id="header">{{ date }}</div>
-    <div v-if="isWorkDay">
-      <Card
-        v-for="task in tasks"
-        v-bind:key="task.issueId"
-        :color="task.color"
-        :summary="task.summary"
-        :hoursInCurrentDate="task.hoursInCurrentDate"
-        draggable="true"
-      ></Card>
-    </div>
+    <Card
+      v-for="(task, index) in tasks"
+      :key="task.issueId + '_' + index"
+      :id="task.issueId + '_' + index"
+      :color="task.color"
+      :summary="task.summary"
+      :hoursInCurrentDate="task.hoursInCurrentDate"
+      draggable="true"
+      @dragstart.native="onDrag"
+    ></Card>
   </div>
 </template>
 <script>
@@ -19,16 +19,22 @@ export default {
   props: {
     id: String,
     date: String,
-    tasks: Array,
-    isWorkDay: Boolean
+    tasks: Array
   },
   components: {
     Card
   },
   methods: {
-    drop: e => {
-      const card_id = e.dataTransfer.getData("card_id");
+    onDrag: e => {
+      console.log("drag");
+      e.dataTransfer.setData("dragged_card_id", e.srcElement.id);
+    },
+    onDrop: e => {
+      console.log("drop");
+      const card_id = e.dataTransfer.getData("dragged_card_id");
       const card = document.getElementById(card_id);
+      console.log(card_id);
+      console.log(card);
       card.style.display = "block";
       e.target.appendChild(card);
     }

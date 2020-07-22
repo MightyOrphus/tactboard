@@ -10,8 +10,8 @@ import TactBoard from "./components/TactBoard.vue";
 export default {
   name: "App",
   components: {
-    TactBoard,
-  },
+    TactBoard
+  }
 };
 </script>
 

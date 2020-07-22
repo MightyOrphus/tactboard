@@ -1,11 +1,5 @@
 <template>
-  <div
-    v-bind:id="id"
-    class="card"
-    v-bind:draggable="draggable"
-    @dragstart="dragStart"
-    @dragover.stop
-  >
+  <div v-bind:id="id" class="card">
     <p>{{ summary }}</p>
     <p>{{ hoursInCurrentDate }}</p>
   </div>
@@ -15,10 +9,9 @@
 export default {
   props: {
     id: String,
-    draggable: String,
     summary: String,
     color: String,
-    hoursInCurrentDate: Number,
+    hoursInCurrentDate: Number
   },
   mounted() {
     this.setBackgroundColor();
@@ -26,16 +19,8 @@ export default {
   methods: {
     setBackgroundColor() {
       this.$el.style.backgroundColor = this.color;
-    },
-    dragStart(e) {
-      const target = e.target;
-      e.dataTransfer.setData("card_id", target.id);
-
-      setTimeout(() => {
-        target.style.display = "none";
-      }, 0);
-    },
-  },
+    }
+  }
 };
 </script>
 
