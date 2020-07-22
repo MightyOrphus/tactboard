@@ -2,7 +2,28 @@
   <div class="tactboard">
     <b-tabs id="inoutTab">
       <b-tab title="JiraInput" active>
-        <JiraInput />
+        <div id="inputForm">
+          <div id="myDateRange">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" format="yyyy-MM-dd" />
+          </div>
+          <div>
+            <label for="sprintRange">Sprint range:</label>
+            <input type="text" id="sprintRange" value="2" />
+          </div>
+          <div>
+            <label for="numOfDev">Number of Dev:</label>
+            <input type="text" id="numOfDev" value="3" />
+          </div>
+          <div>
+            <label for="numOfTester">Number Of Tester (not supported yet):</label>
+            <input type="text" id="numOfTester" value="1" />
+          </div>
+          <div>
+            <label>JIRA csv:</label>
+            <input type="file" id="csvFileInput" multiple />
+          </div>
+        </div>
         <button v-on:click="processCSVFile">Draw A Board</button>
       </b-tab>
       <b-tab title="SaveFile">
@@ -24,14 +45,12 @@
 
 <script>
 import DateCol from "./DateCol.vue";
-import JiraInput from "./JiraInput.vue";
 export default {
   mounted: function() {
     this.initStartDate();
   },
   components: {
-    DateCol,
-    JiraInput
+    DateCol
   },
   data: function() {
     return {
