@@ -9,8 +9,7 @@
         :summary="task.summary"
         :hoursInCurrentDate="task.hoursInCurrentDate"
         draggable="true"
-      >
-      </Card>
+      ></Card>
     </div>
   </div>
 </template>
@@ -21,19 +20,19 @@ export default {
     id: String,
     date: String,
     tasks: Array,
-    isWorkDay: Boolean,
+    isWorkDay: Boolean
   },
   components: {
-    Card,
+    Card
   },
   methods: {
-    drop: (e) => {
+    drop: e => {
       const card_id = e.dataTransfer.getData("card_id");
       const card = document.getElementById(card_id);
       card.style.display = "block";
       e.target.appendChild(card);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -50,6 +49,6 @@ export default {
   background-color: var(--backgrounds-3-hex);
   border-style: groove;
   border-color: black;
-  min-width: 100px;
+  min-width: 150px;
 }
 </style>

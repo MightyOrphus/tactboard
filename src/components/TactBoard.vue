@@ -1,28 +1,14 @@
 <template>
   <div class="tactboard">
-    <div id="inputForm">
-      <div id="myDateRange">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" format="yyyy-MM-dd" />
-      </div>
-      <div>
-        <label for="sprintRange">Sprint range:</label>
-        <input type="text" id="sprintRange" value="2" />
-      </div>
-      <div>
-        <label for="numOfDev">Number of Dev:</label>
-        <input type="text" id="numOfDev" value="3" />
-      </div>
-      <div>
-        <label for="numOfTester">Number Of Tester (not supported yet):</label>
-        <input type="text" id="numOfTester" value="1" />
-      </div>
-      <div>
-        <label>JIRA csv:</label>
-        <input type="file" id="csvFileInput" multiple />
-      </div>
-      <button v-on:click="processCSVFile">Draw A Board</button>
-    </div>
+    <b-tabs id="inoutTab">
+      <b-tab title="JiraInput" active>
+        <JiraInput />
+        <button v-on:click="processCSVFile">Draw A Board</button>
+      </b-tab>
+      <b-tab title="SaveFile">
+        <p>wait for implementation</p>
+      </b-tab>
+    </b-tabs>
     <div id="board" class="flexbox">
       <DateCol
         v-for="date in allDatesInSprint"
@@ -38,12 +24,14 @@
 
 <script>
 import DateCol from "./DateCol.vue";
+import JiraInput from "./JiraInput.vue";
 export default {
   mounted: function() {
     this.initStartDate();
   },
   components: {
-    DateCol
+    DateCol,
+    JiraInput
   },
   data: function() {
     return {
@@ -322,8 +310,8 @@ export default {
 </script>
 
 <style scoped>
-#inputForm {
-  width: 350px;
+#inoutTab {
+  width: 500px;
   margin: 10px;
   padding: 5px;
   background-color: var(--backgrounds-3-hex);
