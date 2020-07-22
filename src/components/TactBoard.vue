@@ -8,15 +8,15 @@
             <input type="date" id="startDate" format="yyyy-MM-dd" />
           </div>
           <div>
-            <label for="sprintRange">Sprint range:</label>
+            <label for="sprintRange">Sprint range (unit: week(s)):</label>
             <input type="text" id="sprintRange" value="2" />
           </div>
           <div>
-            <label for="numOfDev">Number of Dev:</label>
+            <label for="numOfDev">Number of Dev(s):</label>
             <input type="text" id="numOfDev" value="3" />
           </div>
           <div>
-            <label for="numOfTester">Number Of Tester (not supported yet):</label>
+            <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
             <input type="text" id="numOfTester" value="1" />
           </div>
           <div>
@@ -240,6 +240,7 @@ export default {
             } else if (originalEst > remainingHours) {
               originalEst = originalEst - remainingHours;
               task.hoursInCurrentDate = remainingHours;
+              console.log(task);
               currentDate.push(task);
               remainingHours = 0;
             }
