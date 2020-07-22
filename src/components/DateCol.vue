@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:id="id" class="dateCol" @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
+  <div v-bind:id="id" class="dateCol dropAllowed" @drop="onDrop" @dragover.prevent>
     <div id="header">{{ date }}</div>
     <Card
       v-for="(task, index) in tasks"
@@ -26,17 +26,20 @@ export default {
   },
   methods: {
     onDrag: e => {
-      console.log("drag");
+      e.dataTransfer.dropEffect = "move";
+      e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("dragged_card_id", e.srcElement.id);
     },
     onDrop: e => {
-      console.log("drop");
-      const card_id = e.dataTransfer.getData("dragged_card_id");
-      const card = document.getElementById(card_id);
-      console.log(card_id);
-      console.log(card);
-      card.style.display = "block";
-      e.target.appendChild(card);
+      e.preventDefault();
+      let targetClasses = e.target.className;
+      if (
+        targetClasses &&
+        targetClasses.toLowerCase().includes("dropallowed")
+      ) {
+        const card_id = e.dataTransfer.getData("dragged_card_id");
+        e.target.appendChild(document.getElementById(card_id));
+      }
     }
   }
 };
