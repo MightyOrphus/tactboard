@@ -185,18 +185,18 @@ export default {
       var that = this;
       reader.onload = function(event) {
         var fileContent = that.CSVToArray(event.target.result);
-        var tasksGroupByParent = that.groupByParent([...fileContent]);
-        tasksGroupByParent = that.removeSprintLevel(
-          tasksGroupByParent,
+        var tasksGroupedByParent = that.groupByParent([...fileContent]);
+        tasksGroupedByParent = that.removeSprintLevel(
+          tasksGroupedByParent,
           fileContent
         );
         that.tasksGroupedByDate = that.distributeTasksToDate(
-          tasksGroupByParent
+          tasksGroupedByParent
         );
       };
       reader.readAsText(inputFile);
     },
-    removeSprintLevel(tasksGroupByParent, fileContent) {
+    removeSprintLevel(tasksGroupedByParent, fileContent) {
       var headers = fileContent.shift();
       var issueIdIdx = headers.indexOf("Issue id");
       var sumIdx = headers.indexOf("Summary");
@@ -210,8 +210,8 @@ export default {
           break;
         }
       }
-      if (sprintLvlId) delete tasksGroupByParent[sprintLvlId];
-      return tasksGroupByParent;
+      if (sprintLvlId) delete tasksGroupedByParent[sprintLvlId];
+      return tasksGroupedByParent;
     },
     randomColor() {
       return (
@@ -261,9 +261,9 @@ export default {
     toHour(second) {
       return Math.floor(second / this.hourInSecond);
     },
-    distributeTasksToDate(tasksGroupByParent) {
+    distributeTasksToDate(tasksGroupedByParent) {
       var tasksGroupedByDate = new Array();
-      var parentIds = Object.keys(tasksGroupByParent);
+      var parentIds = Object.keys(tasksGroupedByParent);
       var numberOfDev = document.getElementById("numOfDev").value;
 
       var possibleHoursInOneDay =
@@ -274,7 +274,7 @@ export default {
 
       for (var i = 0; i < parentIds.length; i++) {
         var parentId = parentIds[i];
-        var tasks = tasksGroupByParent[parentId];
+        var tasks = tasksGroupedByParent[parentId];
         tasks.forEach(function(task) {
           var originalEst = task.oriEst;
           while (originalEst !== 0) {
