@@ -1,7 +1,7 @@
 <template>
   <div class="tactboard">
     <b-tabs id="inoutTab">
-      <b-tab title="JiraInput" active>
+      <b-tab title="JiraInput">
         <div id="inputForm">
           <div id="myDateRange">
             <label for="startDate">Start Date:</label>
@@ -21,13 +21,18 @@
           </div>
           <div>
             <label>JIRA csv:</label>
-            <input type="file" id="csvFileInput" multiple />
+            <input type="file" id="csvFileInput" />
           </div>
         </div>
-        <button v-on:click="processCSVFile">Draw A Board</button>
+        <b-button v-on:click="processCSVFile" squared>Draw A Board</b-button>
       </b-tab>
-      <b-tab title="SaveFile">
-        <p>wait for implementation</p>
+      <b-tab title="SaveFile" active>
+        <div>
+          <label>JSON file:</label>
+          <input type="file" id="jsonFileInput" />
+        </div>
+        <b-button v-on:click="importJSON" squared>Import</b-button>
+        <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
       </b-tab>
     </b-tabs>
     <div id="board" class="flexbox">
@@ -81,6 +86,34 @@ export default {
         "-" +
         ("0" + m.getUTCDate()).slice(-2)
       );
+    },
+    importJSON() {
+      var inputFile = document.getElementById("jsonFileInput").files[0];
+
+      if (!inputFile) {
+        alert("No input file selected.");
+        return;
+      }
+
+      var reader = new FileReader();
+      var that = this;
+      reader.onload = function(event) {
+        that.allDatesInSprint = JSON.parse(event.target.result);
+      };
+      reader.readAsText(inputFile);
+    },
+    saveAsJSON() {
+      if (this.allDatesInSprint && this.allDatesInSprint.length > 0) {
+        var a = document.createElement("a");
+        var file = new Blob([JSON.stringify(this.allDatesInSprint)], {
+          type: "text/plain"
+        });
+        a.href = URL.createObjectURL(file);
+        a.download = "tactboard.json";
+        a.click();
+      } else {
+        alert("No data to export!!!");
+      }
     },
     setAllDatesInSprint(startDate, endDate, tasksGroupByDate) {
       this.allDatesInSprint = new Array();
@@ -340,6 +373,10 @@ export default {
 input,
 button {
   margin-top: 3px;
+}
+
+#saveAsButton {
+  margin-left: 10px;
 }
 
 .flexbox {
