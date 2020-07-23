@@ -210,7 +210,9 @@ export default {
           break;
         }
       }
-      if (sprintLvlId) delete tasksGroupedByParent[sprintLvlId];
+      if (sprintLvlId) {
+        tasksGroupedByParent.filter(parent => parent.id != sprintLvlId);
+      }
       return tasksGroupedByParent;
     },
     randomColor() {
@@ -219,7 +221,7 @@ export default {
       );
     },
     groupByParent(fileContent) {
-      var result = {};
+      var result = new Array();
       var headers = fileContent.shift();
       var parentIssueIdx = headers.indexOf("Parent id");
       var sumIdx = headers.indexOf("Summary");
@@ -249,21 +251,30 @@ export default {
             type: line[issueTypeIdx],
             color: someRandomColor
           };
-          if (result[parentId]) {
-            result[parentId].push(taskObj);
-          } else {
-            result[parentId] = new Array(taskObj);
-          }
+          this.addOrAppend(result, parentId, taskObj);
         }
       }
       return result;
+    },
+    addOrAppend(result, parentId, taskObj) {
+      for (let i = 0; i < result.length; i++) {
+        let obj = result[i];
+        if (obj.id === parentId) {
+          obj.tasks.push(taskObj);
+          return;
+        }
+      }
+      result.push({
+        id: parentId,
+        tasks: Array(1).fill(taskObj)
+      });
     },
     toHour(second) {
       return Math.floor(second / this.hourInSecond);
     },
     distributeTasksToDate(tasksGroupedByParent) {
+      console.log(tasksGroupedByParent);
       var tasksGroupedByDate = new Array();
-      var parentIds = Object.keys(tasksGroupedByParent);
       var numberOfDev = document.getElementById("numOfDev").value;
 
       var possibleHoursInOneDay =
@@ -272,9 +283,8 @@ export default {
       var currentDate = new Array();
       var remainingHours = possibleHoursInOneDay;
 
-      for (var i = 0; i < parentIds.length; i++) {
-        var parentId = parentIds[i];
-        var tasks = tasksGroupedByParent[parentId];
+      for (var i = 0; i < tasksGroupedByParent.length; i++) {
+        var tasks = tasksGroupedByParent[i].tasks;
         tasks.forEach(function(task) {
           var originalEst = task.oriEst;
           while (originalEst !== 0) {
