@@ -61,13 +61,13 @@ export default {
     return {
       allDatesInSprint: new Array(),
       numberOfHoursInOneDayPerPerson: 6,
-      tasksGroupByDate: {},
+      tasksGroupedByDate: {},
       hourInSecond: 3600
     };
   },
   watch: {
-    tasksGroupByDate: function() {
-      this.drawABoard(this.tasksGroupByDate);
+    tasksGroupedByDate: function() {
+      this.drawABoard(this.tasksGroupedByDate);
     }
   },
   methods: {
@@ -115,7 +115,7 @@ export default {
         alert("No data to export!!!");
       }
     },
-    setAllDatesInSprint(startDate, endDate, tasksGroupByDate) {
+    setAllDatesInSprint(startDate, endDate, tasksGroupedByDate) {
       this.allDatesInSprint = new Array();
       var dateHolder = new Date(startDate.getTime());
       var dateNum = 0;
@@ -123,8 +123,8 @@ export default {
         var isWorkDay = dateHolder.getDay() != 6 && dateHolder.getDay() != 0;
         if (isWorkDay) {
           var tasksInDate;
-          if (dateNum < tasksGroupByDate.length)
-            tasksInDate = [...tasksGroupByDate[dateNum]];
+          if (dateNum < tasksGroupedByDate.length)
+            tasksInDate = [...tasksGroupedByDate[dateNum]];
           else tasksInDate = [];
           this.allDatesInSprint.push({
             tasks: tasksInDate,
@@ -156,11 +156,11 @@ export default {
 
       return [day, month, year].join("-");
     },
-    drawABoard(tasksGroupByDate) {
+    drawABoard(tasksGroupedByDate) {
       var startDate = new Date(document.getElementById("startDate").value);
       var numberOfWeeks = document.getElementById("sprintRange").value;
       var endDate = new Date(this.findEndDate(startDate, numberOfWeeks));
-      this.setAllDatesInSprint(startDate, endDate, tasksGroupByDate);
+      this.setAllDatesInSprint(startDate, endDate, tasksGroupedByDate);
     },
     processCSVFile() {
       var inputFile = document.getElementById("csvFileInput").files[0];
@@ -179,7 +179,9 @@ export default {
           tasksGroupByParent,
           fileContent
         );
-        that.tasksGroupByDate = that.distributeTasksToDate(tasksGroupByParent);
+        that.tasksGroupedByDate = that.distributeTasksToDate(
+          tasksGroupByParent
+        );
       };
       reader.readAsText(inputFile);
     },
@@ -249,7 +251,7 @@ export default {
       return Math.floor(second / this.hourInSecond);
     },
     distributeTasksToDate(tasksGroupByParent) {
-      var tasksGroupByDate = new Array();
+      var tasksGroupedByDate = new Array();
       var parentIds = Object.keys(tasksGroupByParent);
       var numberOfDev = document.getElementById("numOfDev").value;
 
@@ -279,14 +281,14 @@ export default {
             }
 
             if (remainingHours === 0) {
-              tasksGroupByDate.push([...currentDate]);
+              tasksGroupedByDate.push([...currentDate]);
               remainingHours = possibleHoursInOneDay;
               currentDate = new Array();
             }
           }
         });
       }
-      return tasksGroupByDate;
+      return tasksGroupedByDate;
     },
     CSVToArray(strData, strDelimiter) {
       // Check to see if the delimiter is defined. If not,
