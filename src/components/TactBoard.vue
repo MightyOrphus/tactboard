@@ -26,6 +26,7 @@
             </div>
           </div>
           <b-button v-on:click="processCSVFile" squared>Draw A Board</b-button>
+          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
         <b-tab title="SaveFile" active>
           <div>
@@ -34,6 +35,7 @@
           </div>
           <b-button v-on:click="importJSON" squared>Import</b-button>
           <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
+          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
       </b-tabs>
       <table id="storyList">
@@ -92,6 +94,9 @@ export default {
         "-" +
         ("0" + m.getUTCDate()).slice(-2)
       );
+    },
+    clearBoard() {
+      this.allDatesInSprint = null;
     },
     importJSON() {
       var inputFile = document.getElementById("jsonFileInput").files[0];
@@ -383,7 +388,8 @@ button {
   margin-top: 3px;
 }
 
-#saveAsButton {
+#saveAsButton,
+#clearBoardButton {
   margin-left: 10px;
 }
 
