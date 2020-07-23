@@ -1,40 +1,46 @@
 <template>
   <div class="tactboard">
-    <b-tabs id="inoutTab">
-      <b-tab title="JiraInput">
-        <div id="inputForm">
-          <div id="myDateRange">
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" format="yyyy-MM-dd" />
+    <div id="upperPart">
+      <b-tabs id="inoutTab">
+        <b-tab title="JiraInput">
+          <div id="inputForm">
+            <div id="myDateRange">
+              <label for="startDate">Start Date:</label>
+              <input type="date" id="startDate" format="yyyy-MM-dd" />
+            </div>
+            <div>
+              <label for="sprintRange">Sprint range (unit: week(s)):</label>
+              <input type="text" id="sprintRange" value="2" />
+            </div>
+            <div>
+              <label for="numOfDev">Number of Dev(s):</label>
+              <input type="text" id="numOfDev" value="3" />
+            </div>
+            <div>
+              <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
+              <input type="text" id="numOfTester" value="1" />
+            </div>
+            <div>
+              <label>JIRA csv:</label>
+              <input type="file" id="csvFileInput" />
+            </div>
           </div>
+          <b-button v-on:click="processCSVFile" squared>Draw A Board</b-button>
+        </b-tab>
+        <b-tab title="SaveFile" active>
           <div>
-            <label for="sprintRange">Sprint range (unit: week(s)):</label>
-            <input type="text" id="sprintRange" value="2" />
+            <label>JSON file:</label>
+            <input type="file" id="jsonFileInput" />
           </div>
-          <div>
-            <label for="numOfDev">Number of Dev(s):</label>
-            <input type="text" id="numOfDev" value="3" />
-          </div>
-          <div>
-            <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
-            <input type="text" id="numOfTester" value="1" />
-          </div>
-          <div>
-            <label>JIRA csv:</label>
-            <input type="file" id="csvFileInput" />
-          </div>
-        </div>
-        <b-button v-on:click="processCSVFile" squared>Draw A Board</b-button>
-      </b-tab>
-      <b-tab title="SaveFile" active>
-        <div>
-          <label>JSON file:</label>
-          <input type="file" id="jsonFileInput" />
-        </div>
-        <b-button v-on:click="importJSON" squared>Import</b-button>
-        <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
-      </b-tab>
-    </b-tabs>
+          <b-button v-on:click="importJSON" squared>Import</b-button>
+          <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
+        </b-tab>
+      </b-tabs>
+      <table id="storyList">
+        <template></template>
+        <template></template>
+      </table>
+    </div>
     <div id="board" class="flexbox">
       <DateCol
         v-for="date in allDatesInSprint"
@@ -275,7 +281,6 @@ export default {
             } else if (originalEst > remainingHours) {
               originalEst = originalEst - remainingHours;
               task.hoursInCurrentDate = remainingHours;
-              console.log(task);
               currentDate.push(task);
               remainingHours = 0;
             }
@@ -365,6 +370,7 @@ export default {
 
 <style scoped>
 #inoutTab {
+  float: left;
   width: 500px;
   padding: 5px;
   background-color: var(--backgrounds-3-hex);
