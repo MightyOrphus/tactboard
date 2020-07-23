@@ -216,8 +216,15 @@ export default {
       return tasksGroupedByParent;
     },
     randomColor() {
+      // cr. https://stackoverflow.com/questions/43193341/how-to-generate-random-pastel-or-brighter-color-in-javascript
       return (
-        "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6)
+        "hsl(" +
+        360 * Math.random() +
+        "," +
+        (25 + 70 * Math.random()) +
+        "%," +
+        (85 + 10 * Math.random()) +
+        "%)"
       );
     },
     groupByParent(fileContent) {
