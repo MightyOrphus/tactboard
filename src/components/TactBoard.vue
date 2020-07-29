@@ -14,18 +14,18 @@
             </div>
             <div>
               <label for="numOfDev">Number of Dev(s):</label>
-              <input type="text" id="numOfDev" value="3" />
+              <input type="text" id="numOfDev" v-model="numOfDev" />
             </div>
             <div>
               <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
-              <input type="text" id="numOfTester" value="1" />
+              <input type="text" id="numOfTester" v-model="numOfTester" />
             </div>
             <div>
               <label>JIRA csv:</label>
               <input type="file" id="csvFileInput" />
             </div>
           </div>
-          <b-button v-on:click="processCSVFile" squared>Draw A Board</b-button>
+          <b-button v-on:click="processCSVFile" squared>Process CSV</b-button>
           <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
         <b-tab title="SaveFile" active>
@@ -38,10 +38,7 @@
           <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
       </b-tabs>
-      <table id="storyList">
-        <template></template>
-        <template></template>
-      </table>
+      <StoryList id="storyList" />
     </div>
     <div id="board" class="flexbox">
       <DateCol
@@ -50,6 +47,8 @@
         :date="date.dateVal"
         :tasks="date.tasks"
         :isWorkDay="date.isWorkDay"
+        :numOfDev="numOfDev"
+        :numOfTester="numOfTester"
         class="dateCol"
       ></DateCol>
     </div>
@@ -58,25 +57,31 @@
 
 <script>
 import DateCol from "./DateCol.vue";
+import StoryList from "./StoryList.vue";
 export default {
-  mounted: function() {
+  mounted: function () {
     this.initStartDate();
   },
   components: {
-    DateCol
+    DateCol,
+    StoryList,
   },
-  data: function() {
+  data: function () {
     return {
       allDatesInSprint: new Array(),
       numberOfHoursInOneDayPerPerson: 6,
       tasksGroupedByDate: {},
-      hourInSecond: 3600
+      hourInSecond: 3600,
+      storyInfo: new Array(),
+      numOfDev: 3,
+      numOfTester: 1,
     };
   },
   watch: {
-    tasksGroupedByDate: function() {
+    tasksGroupedByDate: function () {
       this.drawABoard(this.tasksGroupedByDate);
-    }
+      this.drawStoryList();
+    },
   },
   methods: {
     initStartDate() {
@@ -97,6 +102,11 @@ export default {
     },
     clearBoard() {
       this.allDatesInSprint = null;
+      this.storyInfo = new Array();
+      document.getElementById("storyList").stories = this.storyInfo;
+    },
+    drawStoryList() {
+      document.getElementById("storyList").stories = this.storyInfo;
     },
     importJSON() {
       var inputFile = document.getElementById("jsonFileInput").files[0];
@@ -108,7 +118,7 @@ export default {
 
       var reader = new FileReader();
       var that = this;
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         that.allDatesInSprint = JSON.parse(event.target.result);
       };
       reader.readAsText(inputFile);
@@ -117,7 +127,7 @@ export default {
       if (this.allDatesInSprint && this.allDatesInSprint.length > 0) {
         var a = document.createElement("a");
         var file = new Blob([JSON.stringify(this.allDatesInSprint)], {
-          type: "text/plain"
+          type: "text/plain",
         });
         a.href = URL.createObjectURL(file);
         a.download = "tactboard.json";
@@ -139,14 +149,14 @@ export default {
           else tasksInDate = [];
           this.allDatesInSprint.push({
             tasks: tasksInDate,
-            dateVal: this.formatDate(new Date(dateHolder))
+            dateVal: this.formatDate(new Date(dateHolder)),
           });
           dateNum++;
         } else {
           this.allDatesInSprint.push({
             tasks: [],
             dateVal: this.formatDate(new Date(dateHolder)),
-            isWorkDay: isWorkDay
+            isWorkDay: isWorkDay,
           });
         }
         dateHolder.setDate(dateHolder.getDate() + 1);
@@ -183,7 +193,7 @@ export default {
 
       var reader = new FileReader();
       var that = this;
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         var fileContent = that.CSVToArray(event.target.result);
         var tasksGroupedByParent = that.groupByParent([...fileContent]);
         tasksGroupedByParent = that.removeSprintLevel(
@@ -211,7 +221,7 @@ export default {
         }
       }
       if (sprintLvlId) {
-        tasksGroupedByParent.filter(parent => parent.id != sprintLvlId);
+        tasksGroupedByParent.filter((parent) => parent.id != sprintLvlId);
       }
       return tasksGroupedByParent;
     },
@@ -242,23 +252,34 @@ export default {
       for (var lineNum = 0; lineNum < fileContent.length; lineNum++) {
         var line = fileContent[lineNum];
 
-        if (!line[parentIssueIdx]) continue;
-        // random new color when parent issue change...
-        if (parentId && parentId !== line[parentIssueIdx])
+        if (!line[parentIssueIdx]) {
+          // story line
+          // random new color when parent issue change...
           someRandomColor = this.randomColor();
-        if (line[accountIdx].includes("FSG20")) {
-          // currently get only development task
-          // QA task scenario is wait for implemented.
-          var parentId = line[parentIssueIdx];
-          var taskObj = {
-            summary: line[sumIdx],
-            issueId: line[issueIdIdx],
-            issueKey: line[issueKeyIdx],
-            oriEst: this.toHour(line[orgEstIdx]),
-            type: line[issueTypeIdx],
-            color: someRandomColor
-          };
-          this.addOrAppend(result, parentId, taskObj);
+          if (line[sumIdx]) {
+            this.storyInfo.push({
+              summary: line[sumIdx],
+              issueId: line[issueIdIdx],
+              issueKey: line[issueKeyIdx],
+              color: someRandomColor,
+            });
+          }
+        } else {
+          // task line
+          if (line[accountIdx].includes("FSG20")) {
+            // currently get only development task
+            // QA task scenario is wait for implemented.
+            var parentId = line[parentIssueIdx];
+            var taskObj = {
+              summary: line[sumIdx],
+              issueId: line[issueIdIdx],
+              issueKey: line[issueKeyIdx],
+              oriEst: this.toHour(line[orgEstIdx]),
+              type: line[issueTypeIdx],
+              color: someRandomColor,
+            };
+            this.addOrAppend(result, parentId, taskObj);
+          }
         }
       }
       return result;
@@ -273,26 +294,24 @@ export default {
       }
       result.push({
         id: parentId,
-        tasks: Array(1).fill(taskObj)
+        tasks: Array(1).fill(taskObj),
       });
     },
     toHour(second) {
       return Math.floor(second / this.hourInSecond);
     },
     distributeTasksToDate(tasksGroupedByParent) {
-      console.log(tasksGroupedByParent);
       var tasksGroupedByDate = new Array();
-      var numberOfDev = document.getElementById("numOfDev").value;
 
       var possibleHoursInOneDay =
-        this.numberOfHoursInOneDayPerPerson * numberOfDev;
+        this.numberOfHoursInOneDayPerPerson * this.numOfDev;
 
       var currentDate = new Array();
       var remainingHours = possibleHoursInOneDay;
 
       for (var i = 0; i < tasksGroupedByParent.length; i++) {
         var tasks = tasksGroupedByParent[i].tasks;
-        tasks.forEach(function(task) {
+        tasks.forEach(function (task) {
           var originalEst = task.oriEst;
           while (originalEst !== 0) {
             if (originalEst <= remainingHours) {
@@ -385,8 +404,8 @@ export default {
 
       // Return the parsed data.
       return arrData;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -394,7 +413,6 @@ export default {
 #inoutTab {
   float: left;
   width: 500px;
-  padding: 5px;
   background-color: var(--backgrounds-3-hex);
   border-style: groove;
   border-color: black;
