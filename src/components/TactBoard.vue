@@ -150,6 +150,7 @@ export default {
           this.allDatesInSprint.push({
             tasks: tasksInDate,
             dateVal: this.formatDate(new Date(dateHolder)),
+            isWorkDay: isWorkDay,
           });
           dateNum++;
         } else {

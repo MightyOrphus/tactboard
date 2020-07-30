@@ -1,14 +1,19 @@
 <template>
   <div v-bind:id="id" class="dateCol">
-    <div id="header">{{ date }}</div>
-    <tr
-      class="cellPair"
-      v-for="index in ( numOfDev * expectedMaximumTaskPerDev + numOfTester * expectedMaximumTaskPerTester) "
-      :key="index"
-    >
-      <td id="leftCell" class="tableCell dropAllowed" @drop="onDrop" @dragover.prevent></td>
-      <td id="rightCell" class="tableCell dropAllowed" @drop="onDrop" @dragover.prevent></td>
-    </tr>
+    <div id="header">{{ date }} - {{isWorkDay}}</div>
+    <template v-if="isWorkDay">
+      <tr
+        class="cellPair"
+        v-for="index in ( numOfDev * expectedMaximumTaskPerDev + numOfTester * expectedMaximumTaskPerTester) "
+        :key="index"
+      >
+        <td id="leftCell" class="tableCell dropAllowed" @drop="onDrop" @dragover.prevent></td>
+        <td id="rightCell" class="tableCell dropAllowed" @drop="onDrop" @dragover.prevent></td>
+      </tr>
+    </template>
+    <template v-else>
+      <div class="holidayCol"></div>
+    </template>
   </div>
 </template>
 <script>
@@ -24,6 +29,7 @@ export default {
     tasks: Array,
     numOfDev: Number,
     numOfTester: Number,
+    isWorkDay: Boolean,
   },
   data: () => {
     return {
@@ -36,7 +42,6 @@ export default {
     addCard() {
       let cellPairs = this.$el.querySelectorAll(".cellPair");
       let count = 0;
-      console.log(cellPairs[count].children);
       this.tasks.forEach((task) => {
         var ComponentClass = Vue.extend(Card);
         let newCard = new ComponentClass({
@@ -112,5 +117,10 @@ export default {
 #leftCell {
   border-right: 2px groove black;
   position: relative;
+}
+
+.holidayCol {
+  height: 100%;
+  background-color: orange;
 }
 </style>
