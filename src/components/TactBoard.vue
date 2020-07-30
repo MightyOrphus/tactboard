@@ -146,13 +146,18 @@ export default {
       while (dateHolder < endDate) {
         var isWorkDay = dateHolder.getDay() != 6 && dateHolder.getDay() != 0;
         if (isWorkDay) {
-          var tasksInDate;
-          if (dateNum < tasksGroupedByDate.length)
+          let tasksInDate, emptyCellVal;
+          if (dateNum < tasksGroupedByDate.length) {
             tasksInDate = tasksGroupedByDate[dateNum].tasks;
-          else tasksInDate = [];
+            emptyCellVal = tasksGroupedByDate[dateNum].emptyCell;
+          } else {
+            tasksInDate = [];
+            emptyCellVal = 0;
+          }
+
           this.allDatesInSprint.push({
             tasks: tasksInDate,
-            emptyCell: tasksGroupedByDate[dateNum].emptyCell,
+            emptyCell: emptyCellVal,
             dateVal: this.formatDate(new Date(dateHolder)),
             isWorkDay: isWorkDay,
           });
@@ -341,7 +346,8 @@ export default {
             let hourDebtForCurrentDate = hourDebts.shift();
             currentDate = {
               remainingHours: possibleHoursInOneDay - hourDebtForCurrentDate,
-              emptyCell: hourDebtForCurrentDate / this.hoursInOneDayPerPerson,
+              emptyCell:
+                hourDebtForCurrentDate / (this.hoursInOneDayPerPerson / 2),
               tasks: new Array(),
             };
           }
@@ -356,7 +362,7 @@ export default {
         hourToAdd -= remainingHourInThatDay;
       }
       while (hourToAdd > 0) {
-        if (hourToAdd > maxDebtPerDay) {
+        if (hourToAdd >= maxDebtPerDay) {
           hourToAdd -= maxDebtPerDay;
           hourDebt.push(maxDebtPerDay);
         } else {

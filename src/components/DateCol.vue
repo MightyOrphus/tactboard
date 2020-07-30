@@ -41,7 +41,8 @@ export default {
   components: {},
   methods: {
     addCard() {
-      let cellPairs = this.$el.querySelectorAll(".cellPair");
+      let tabelCells = this.$el.querySelectorAll(".tableCell");
+
       let count = 0;
       if (this.emptyCell > 0) count = Math.ceil(this.emptyCell) + 1;
 
@@ -59,7 +60,9 @@ export default {
         newCard.$mount();
         newCard.$el.draggable = "true";
         newCard.$el.addEventListener("dragstart", this.onDrag);
-        cellPairs[count++].children[0].appendChild(newCard.$el);
+        tabelCells[count].appendChild(newCard.$el);
+        if (task.oriEst == 3) count++;
+        else count += 2;
       });
     },
     onDrag(e) {
