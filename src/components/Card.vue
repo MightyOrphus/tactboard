@@ -1,7 +1,7 @@
 <template>
   <div v-bind:id="id" class="card">
     <p id="taskSummary">{{ summary }}</p>
-    <p id="taskDuration">{{ hoursInCurrentDate }}</p>
+    <p id="taskDuration">{{ oriEst }}</p>
   </div>
 </template>
 
@@ -11,7 +11,7 @@ export default {
     id: String,
     summary: String,
     color: String,
-    hoursInCurrentDate: Number,
+    oriEst: Number,
   },
   mounted() {
     this.setBackgroundColor();

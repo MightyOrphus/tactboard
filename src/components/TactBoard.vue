@@ -10,7 +10,7 @@
             </div>
             <div>
               <label for="sprintRange">Sprint range (unit: week(s)):</label>
-              <input type="text" id="sprintRange" value="2" />
+              <input type="text" id="sprintRange" v-model="sprintRange" />
             </div>
             <div>
               <label for="numOfDev">Number of Dev(s):</label>
@@ -69,12 +69,14 @@ export default {
   data: function () {
     return {
       allDatesInSprint: new Array(),
-      numberOfHoursInOneDayPerPerson: 6,
+      hoursInOneDayPerPerson: 6,
       tasksGroupedByDate: {},
       hourInSecond: 3600,
       storyInfo: new Array(),
       numOfDev: 3,
       numOfTester: 1,
+      sprintRange: 2,
+      defaultHoursForUnestimatedTask: 6,
     };
   },
   watch: {
@@ -145,7 +147,7 @@ export default {
         if (isWorkDay) {
           var tasksInDate;
           if (dateNum < tasksGroupedByDate.length)
-            tasksInDate = [...tasksGroupedByDate[dateNum]];
+            tasksInDate = [...tasksGroupedByDate[dateNum].tasks];
           else tasksInDate = [];
           this.allDatesInSprint.push({
             tasks: tasksInDate,
@@ -196,18 +198,13 @@ export default {
       var that = this;
       reader.onload = function (event) {
         var fileContent = that.CSVToArray(event.target.result);
-        var tasksGroupedByParent = that.groupByParent([...fileContent]);
-        tasksGroupedByParent = that.removeSprintLevel(
-          tasksGroupedByParent,
-          fileContent
-        );
-        that.tasksGroupedByDate = that.distributeTasksToDate(
-          tasksGroupedByParent
-        );
+        var taskList = that.convertCVToTaskList([...fileContent]);
+        that.removeSprintLevel(taskList, fileContent);
+        that.tasksGroupedByDate = that.distributeTasksToDate(taskList);
       };
       reader.readAsText(inputFile);
     },
-    removeSprintLevel(tasksGroupedByParent, fileContent) {
+    removeSprintLevel(taskList, fileContent) {
       var headers = fileContent.shift();
       var issueIdIdx = headers.indexOf("Issue id");
       var sumIdx = headers.indexOf("Summary");
@@ -222,9 +219,8 @@ export default {
         }
       }
       if (sprintLvlId) {
-        tasksGroupedByParent.filter((parent) => parent.id != sprintLvlId);
+        taskList.filter((task) => task.parentId != sprintLvlId);
       }
-      return tasksGroupedByParent;
     },
     randomColor() {
       // cr. https://stackoverflow.com/questions/43193341/how-to-generate-random-pastel-or-brighter-color-in-javascript
@@ -238,7 +234,7 @@ export default {
         "%)"
       );
     },
-    groupByParent(fileContent) {
+    convertCVToTaskList(fileContent) {
       var result = new Array();
       var headers = fileContent.shift();
       var parentIssueIdx = headers.indexOf("Parent id");
@@ -278,64 +274,95 @@ export default {
               oriEst: this.toHour(line[orgEstIdx]),
               type: line[issueTypeIdx],
               color: someRandomColor,
+              parentId: parentId,
             };
-            this.addOrAppend(result, parentId, taskObj);
+            result.push(taskObj);
           }
         }
       }
       return result;
     },
-    addOrAppend(result, parentId, taskObj) {
-      for (let i = 0; i < result.length; i++) {
-        let obj = result[i];
-        if (obj.id === parentId) {
-          obj.tasks.push(taskObj);
-          return;
-        }
-      }
-      result.push({
-        id: parentId,
-        tasks: Array(1).fill(taskObj),
-      });
-    },
     toHour(second) {
+      if (!second) return this.defaultHoursForUnestimatedTask;
       return Math.floor(second / this.hourInSecond);
     },
-    distributeTasksToDate(tasksGroupedByParent) {
-      var tasksGroupedByDate = new Array();
+    distributeTasksToDate(taskList) {
+      let tasksGroupedByDate = new Array();
+      if (taskList && taskList.length) {
+        let possibleHoursInOneDay = this.hoursInOneDayPerPerson * this.numOfDev;
 
-      var possibleHoursInOneDay =
-        this.numberOfHoursInOneDayPerPerson * this.numOfDev;
+        let currentDate = {
+          remainingHours: possibleHoursInOneDay,
+          emptyCell: 0,
+          tasks: new Array(),
+        };
 
-      var currentDate = new Array();
-      var remainingHours = possibleHoursInOneDay;
+        // let workingDaysInSprint = this.sprintRange * 5;
 
-      for (var i = 0; i < tasksGroupedByParent.length; i++) {
-        var tasks = tasksGroupedByParent[i].tasks;
-        tasks.forEach(function (task) {
-          var originalEst = task.oriEst;
-          while (originalEst !== 0) {
-            if (originalEst <= remainingHours) {
-              remainingHours = remainingHours - originalEst;
-              task.hoursInCurrentDate = originalEst;
-              currentDate.push(task);
-              originalEst = 0;
-            } else if (originalEst > remainingHours) {
-              originalEst = originalEst - remainingHours;
-              task.hoursInCurrentDate = remainingHours;
-              currentDate.push(task);
-              remainingHours = 0;
+        let hourDebts = new Array();
+        let maxDebtPerDay = possibleHoursInOneDay;
+        let task;
+
+        while (taskList.length) {
+          task = taskList.shift();
+
+          if (this.hoursInOneDayPerPerson >= task.oriEst) {
+            if (task.oriEst > currentDate.remainingHours) {
+              this.addHourDebt(
+                hourDebts,
+                maxDebtPerDay,
+                task.oriEst - currentDate.remainingHours
+              );
             }
-
-            if (remainingHours === 0) {
-              tasksGroupedByDate.push([...currentDate]);
-              remainingHours = possibleHoursInOneDay;
-              currentDate = new Array();
+            currentDate.remainingHours -= task.oriEst;
+            currentDate.tasks.push(task);
+          } else {
+            if (currentDate.remainingHours >= this.hoursInOneDayPerPerson) {
+              this.addHourDebt(
+                hourDebts,
+                maxDebtPerDay,
+                task.oriEst - this.hoursInOneDayPerPerson
+              );
+            } else {
+              this.addHourDebt(
+                hourDebts,
+                maxDebtPerDay,
+                task.oriEst - currentDate.remainingHours
+              );
             }
+            currentDate.remainingHours -= this.hoursInOneDayPerPerson;
+            currentDate.tasks.push(task);
           }
-        });
+
+          if (currentDate.remainingHours <= 0) {
+            let copiedDate = currentDate;
+            tasksGroupedByDate.push(copiedDate);
+            let hourDebtForCurrentDate = hourDebts.shift();
+            currentDate = {
+              remainingHours: possibleHoursInOneDay - hourDebtForCurrentDate,
+              emptyCell: hourDebtForCurrentDate / this.hoursInOneDayPerPerson,
+              tasks: new Array(),
+            };
+          }
+        }
       }
       return tasksGroupedByDate;
+    },
+    addHourDebt(hourDebt, maxDebtPerDay, hourToAdd) {
+      if (hourDebt.length && hourDebt[hourDebt - 1] < maxDebtPerDay) {
+        let remainingHourInThatDay = maxDebtPerDay - hourDebt[hourDebt - 1];
+        hourDebt[hourDebt - 1] += remainingHourInThatDay;
+        hourToAdd -= remainingHourInThatDay;
+      }
+      while (hourToAdd > 0) {
+        if (hourToAdd > maxDebtPerDay) {
+          hourToAdd -= maxDebtPerDay;
+          hourDebt.push(maxDebtPerDay);
+        } else {
+          hourDebt.push(hourToAdd);
+          hourToAdd = 0;
+        }
+      }
     },
     CSVToArray(strData, strDelimiter) {
       // Check to see if the delimiter is defined. If not,

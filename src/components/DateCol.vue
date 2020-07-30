@@ -49,7 +49,7 @@ export default {
             key: task.issueId + "_" + count,
             id: task.issueId + "_" + count,
             summary: task.summary,
-            hoursInCurrentDate: task.hoursInCurrentDate,
+            oriEst: task.oriEst,
             color: task.color,
           },
         });
@@ -71,7 +71,7 @@ export default {
         targetClasses &&
         targetClasses.toLowerCase().includes("dropallowed")
       ) {
-        const card_id = e.dataTransfer.getData("dragged_card_id");
+        let card_id = e.dataTransfer.getData("dragged_card_id");
         e.target.appendChild(document.getElementById(card_id));
       }
     },
