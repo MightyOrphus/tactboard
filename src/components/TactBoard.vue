@@ -38,12 +38,15 @@
           <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
       </b-tabs>
-      <StoryList id="storyList" />
+      <template v-if="storyInfo.length">
+        <StoryList id="storyList" :stories="this.storyInfo" />
+      </template>
     </div>
     <div id="board" class="flexbox">
       <DateCol
-        v-for="date in allDatesInSprint"
-        :key="date.dateNum"
+        v-for="(date, index) in allDatesInSprint"
+        :key="index"
+        :zIndex="10000 - ( index * 100 )"
         :date="date.dateVal"
         :tasks="date.tasks"
         :isWorkDay="date.isWorkDay"
@@ -83,7 +86,6 @@ export default {
   watch: {
     tasksGroupedByDate: function () {
       this.drawABoard(this.tasksGroupedByDate);
-      this.drawStoryList();
     },
   },
   methods: {
@@ -106,9 +108,6 @@ export default {
     clearBoard() {
       this.allDatesInSprint = null;
       this.storyInfo = new Array();
-      document.getElementById("storyList").stories = this.storyInfo;
-    },
-    drawStoryList() {
       document.getElementById("storyList").stories = this.storyInfo;
     },
     importJSON() {
@@ -237,7 +236,7 @@ export default {
         "," +
         (25 + 70 * Math.random()) +
         "%," +
-        (85 + 10 * Math.random()) +
+        (75 + 20 * Math.random()) +
         "%)"
       );
     },
@@ -445,12 +444,20 @@ export default {
 </script>
 
 <style scoped>
+#upperPart {
+  padding-left: 5px;
+}
+
 #inoutTab {
   float: left;
   width: 500px;
   background-color: var(--backgrounds-3-hex);
   border-style: groove;
   border-color: black;
+}
+
+#inputForm {
+  padding: 5px;
 }
 
 input,

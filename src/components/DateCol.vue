@@ -1,14 +1,26 @@
 <template>
-  <div v-bind:id="id" class="dateCol">
-    <div id="header">{{ date }} - {{isWorkDay}}</div>
+  <div v-bind:id="id" class="dateCol noselect">
+    <div id="header">{{ date }}</div>
     <template v-if="isWorkDay">
       <tr
         class="cellPair"
         v-for="index in ( numOfDev * expectedMaximumTaskPerDev + numOfTester * expectedMaximumTaskPerTester) "
         :key="index"
       >
-        <td id="leftCell" class="tableCell dropAllowed" @drop="onDrop" @dragover.prevent></td>
-        <td id="rightCell" class="tableCell dropAllowed" @drop="onDrop" @dragover.prevent></td>
+        <td
+          id="leftCell"
+          class="tableCell dropAllowed"
+          @drop="onDrop"
+          @dragover.prevent
+          :style="{'z-index': zIndex }"
+        ></td>
+        <td
+          id="rightCell"
+          class="tableCell dropAllowed"
+          @drop="onDrop"
+          @dragover.prevent
+          :style="{'z-index': zIndex }"
+        ></td>
       </tr>
     </template>
     <template v-else>
@@ -22,6 +34,7 @@ import Vue from "vue";
 export default {
   mounted: function () {
     this.addCard();
+    this.$el.style.zIndex = this.zIndex;
   },
   props: {
     id: String,
@@ -31,6 +44,7 @@ export default {
     numOfTester: Number,
     isWorkDay: Boolean,
     emptyCell: Number,
+    zIndex: Number,
   },
   data: () => {
     return {
@@ -60,15 +74,34 @@ export default {
         newCard.$mount();
         newCard.$el.draggable = "true";
         newCard.$el.addEventListener("dragstart", this.onDrag);
+        newCard.$el.addEventListener("dragend", this.onDragEnd);
+        newCard.$el.addEventListener("dragenter", this.onDragEnter);
+        newCard.$el.addEventListener("dragLeave", this.onDragLeave);
         tabelCells[count].appendChild(newCard.$el);
         if (task.oriEst == 3) count++;
         else count += 2;
       });
     },
     onDrag(e) {
+      requestAnimationFrame(function () {
+        e.target.classList.add("hide");
+      });
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("dragged_card_id", e.srcElement.id);
+    },
+    onDragEnter(e) {
+      console.log("onDragEnter");
+      console.log(e);
+      // e.target.style.display = "none";
+    },
+    onDragLeave(e) {
+      console.log("onDragEnter");
+      console.log(e);
+      // e.target.style.display = "block";
+    },
+    onDragEnd(e) {
+      e.target.classList.remove("hide");
     },
     onDrop(e) {
       e.preventDefault();
@@ -128,5 +161,9 @@ export default {
 .holidayCol {
   height: 100%;
   background-color: orange;
+}
+
+.hide {
+  transform: translateX(-9999px);
 }
 </style>

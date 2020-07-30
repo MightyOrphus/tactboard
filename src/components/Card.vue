@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:id="id" class="card">
+  <div v-bind:id="id" class="card noselect">
     <p id="taskSummary">{{ summary }}</p>
     <p id="taskDuration">{{ oriEst }}</p>
   </div>
@@ -30,6 +30,11 @@ export default {
   height: 148px;
   font-size: 15px;
   position: absolute;
+}
+
+.card:hover {
+  z-index: 30000;
+  border: 3px solid black;
 }
 
 #taskSummary {
