@@ -30,6 +30,7 @@ export default {
     numOfDev: Number,
     numOfTester: Number,
     isWorkDay: Boolean,
+    emptyCell: Number,
   },
   data: () => {
     return {
@@ -42,12 +43,14 @@ export default {
     addCard() {
       let cellPairs = this.$el.querySelectorAll(".cellPair");
       let count = 0;
+      if (this.emptyCell > 0) count = Math.ceil(this.emptyCell) + 1;
+
       this.tasks.forEach((task) => {
         var ComponentClass = Vue.extend(Card);
         let newCard = new ComponentClass({
           propsData: {
-            key: task.issueId + "_" + count,
-            id: task.issueId + "_" + count,
+            key: task.issueId,
+            id: task.issueId,
             summary: task.summary,
             oriEst: task.oriEst,
             color: task.color,

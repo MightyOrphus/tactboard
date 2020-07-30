@@ -49,6 +49,7 @@
         :isWorkDay="date.isWorkDay"
         :numOfDev="numOfDev"
         :numOfTester="numOfTester"
+        :emptyCell="date.emptyCell"
         class="dateCol"
       ></DateCol>
     </div>
@@ -147,10 +148,11 @@ export default {
         if (isWorkDay) {
           var tasksInDate;
           if (dateNum < tasksGroupedByDate.length)
-            tasksInDate = [...tasksGroupedByDate[dateNum].tasks];
+            tasksInDate = tasksGroupedByDate[dateNum].tasks;
           else tasksInDate = [];
           this.allDatesInSprint.push({
             tasks: tasksInDate,
+            emptyCell: tasksGroupedByDate[dateNum].emptyCell,
             dateVal: this.formatDate(new Date(dateHolder)),
             isWorkDay: isWorkDay,
           });
@@ -283,8 +285,9 @@ export default {
       return result;
     },
     toHour(second) {
-      if (!second) return this.defaultHoursForUnestimatedTask;
-      return Math.floor(second / this.hourInSecond);
+      if (second && second.length)
+        return Math.floor(second / this.hourInSecond);
+      else return this.defaultHoursForUnestimatedTask;
     },
     distributeTasksToDate(taskList) {
       let tasksGroupedByDate = new Array();
@@ -296,8 +299,6 @@ export default {
           emptyCell: 0,
           tasks: new Array(),
         };
-
-        // let workingDaysInSprint = this.sprintRange * 5;
 
         let hourDebts = new Array();
         let maxDebtPerDay = possibleHoursInOneDay;
