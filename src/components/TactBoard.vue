@@ -17,7 +17,9 @@
               <input type="text" id="numOfDev" v-model="numOfDev" />
             </div>
             <div>
-              <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
+              <label for="numOfTester"
+                >Number Of Tester(s) (not supported yet):</label
+              >
               <input type="text" id="numOfTester" v-model="numOfTester" />
             </div>
             <div>
@@ -26,7 +28,13 @@
             </div>
           </div>
           <b-button v-on:click="processCSVFile" squared>Process CSV</b-button>
-          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+          <b-button
+            v-on:click="clearBoard"
+            id="clearBoardButton"
+            squared
+            variant="dark"
+            >Clear</b-button
+          >
         </b-tab>
         <b-tab title="SaveFile" active>
           <div>
@@ -34,8 +42,20 @@
             <input type="file" id="jsonFileInput" />
           </div>
           <b-button v-on:click="importJSON" squared>Import</b-button>
-          <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
-          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+          <b-button
+            v-on:click="saveAsJSON"
+            id="saveAsButton"
+            squared
+            variant="primary"
+            >Export</b-button
+          >
+          <b-button
+            v-on:click="clearBoard"
+            id="clearBoardButton"
+            squared
+            variant="dark"
+            >Clear</b-button
+          >
         </b-tab>
       </b-tabs>
       <template v-if="storyInfo.length">
@@ -46,7 +66,7 @@
       <DateCol
         v-for="(date, index) in allDatesInSprint"
         :key="index"
-        :zIndex="10000 - ( index * 100 )"
+        :zIndex="10000 - index * 100"
         :date="date.dateVal"
         :tasks="date.tasks"
         :isWorkDay="date.isWorkDay"
@@ -63,14 +83,14 @@
 import DateCol from "./DateCol.vue";
 import StoryList from "./StoryList.vue";
 export default {
-  mounted: function () {
+  mounted: function() {
     this.initStartDate();
   },
   components: {
     DateCol,
     StoryList,
   },
-  data: function () {
+  data: function() {
     return {
       allDatesInSprint: new Array(),
       hoursInOneDayPerPerson: 6,
@@ -84,7 +104,7 @@ export default {
     };
   },
   watch: {
-    tasksGroupedByDate: function () {
+    tasksGroupedByDate: function() {
       this.drawABoard(this.tasksGroupedByDate);
     },
   },
@@ -120,7 +140,7 @@ export default {
 
       var reader = new FileReader();
       var that = this;
-      reader.onload = function (event) {
+      reader.onload = function(event) {
         that.allDatesInSprint = JSON.parse(event.target.result);
       };
       reader.readAsText(inputFile);
@@ -145,18 +165,14 @@ export default {
       while (dateHolder < endDate) {
         var isWorkDay = dateHolder.getDay() != 6 && dateHolder.getDay() != 0;
         if (isWorkDay) {
-          let tasksInDate, emptyCellVal;
+          let tasksInDate;
           if (dateNum < tasksGroupedByDate.length) {
             tasksInDate = tasksGroupedByDate[dateNum].tasks;
-            emptyCellVal = tasksGroupedByDate[dateNum].emptyCell;
           } else {
             tasksInDate = [];
-            emptyCellVal = 0;
           }
-
           this.allDatesInSprint.push({
             tasks: tasksInDate,
-            emptyCell: emptyCellVal,
             dateVal: this.formatDate(new Date(dateHolder)),
             isWorkDay: isWorkDay,
           });
@@ -202,7 +218,7 @@ export default {
 
       var reader = new FileReader();
       var that = this;
-      reader.onload = function (event) {
+      reader.onload = function(event) {
         var fileContent = that.CSVToArray(event.target.result);
         var taskList = that.convertCVToTaskList([...fileContent]);
         that.removeSprintLevel(taskList, fileContent);
@@ -300,7 +316,6 @@ export default {
 
         let currentDate = {
           remainingHours: possibleHoursInOneDay,
-          emptyCell: 0,
           tasks: new Array(),
         };
 
@@ -345,10 +360,15 @@ export default {
             let hourDebtForCurrentDate = hourDebts.shift();
             currentDate = {
               remainingHours: possibleHoursInOneDay - hourDebtForCurrentDate,
-              emptyCell:
-                hourDebtForCurrentDate / (this.hoursInOneDayPerPerson / 2),
               tasks: new Array(),
             };
+            // ceil() if there is an numerator after a dividing process (ex. debt 1 hr from yesterday = ceil to 1 cell)
+            let emptyCell = Math.ceil(
+              hourDebtForCurrentDate / (this.hoursInOneDayPerPerson / 2)
+            );
+            if (emptyCell > 0) {
+              for (let i = 0; i < emptyCell; i++) currentDate.tasks.push({});
+            }
           }
         }
       }

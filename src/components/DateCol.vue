@@ -4,7 +4,8 @@
     <template v-if="isWorkDay">
       <tr
         class="cellPair"
-        v-for="index in ( numOfDev * expectedMaximumTaskPerDev + numOfTester * expectedMaximumTaskPerTester) "
+        v-for="index in numOfDev * expectedMaximumTaskPerDev +
+          numOfTester * expectedMaximumTaskPerTester"
         :key="index"
       >
         <td
@@ -12,14 +13,14 @@
           class="tableCell dropAllowed"
           @drop="onDrop"
           @dragover.prevent
-          :style="{'z-index': zIndex }"
+          :style="{ 'z-index': zIndex }"
         ></td>
         <td
           id="rightCell"
           class="tableCell dropAllowed"
           @drop="onDrop"
           @dragover.prevent
-          :style="{'z-index': zIndex }"
+          :style="{ 'z-index': zIndex }"
         ></td>
       </tr>
     </template>
@@ -32,7 +33,7 @@
 import Card from "./Card.vue";
 import Vue from "vue";
 export default {
-  mounted: function () {
+  mounted: function() {
     this.addCard();
     this.$el.style.zIndex = this.zIndex;
   },
@@ -56,34 +57,32 @@ export default {
   methods: {
     addCard() {
       let tabelCells = this.$el.querySelectorAll(".tableCell");
-
       let count = 0;
-      if (this.emptyCell > 0) count = Math.ceil(this.emptyCell) + 1;
-
       this.tasks.forEach((task) => {
-        var ComponentClass = Vue.extend(Card);
-        let newCard = new ComponentClass({
-          propsData: {
-            key: task.issueId,
-            id: task.issueId,
-            summary: task.summary,
-            oriEst: task.oriEst,
-            color: task.color,
-          },
-        });
-        newCard.$mount();
-        newCard.$el.draggable = "true";
-        newCard.$el.addEventListener("dragstart", this.onDrag);
-        newCard.$el.addEventListener("dragend", this.onDragEnd);
-        newCard.$el.addEventListener("dragenter", this.onDragEnter);
-        newCard.$el.addEventListener("dragLeave", this.onDragLeave);
-        tabelCells[count].appendChild(newCard.$el);
-        if (task.oriEst == 3) count++;
-        else count += 2;
+        if (Object.keys(task).length > 0) {
+          var ComponentClass = Vue.extend(Card);
+          let newCard = new ComponentClass({
+            propsData: {
+              key: task.issueId,
+              id: task.issueId,
+              summary: task.summary,
+              oriEst: task.oriEst,
+              color: task.color,
+            },
+          });
+          newCard.$mount();
+          newCard.$el.draggable = "true";
+          newCard.$el.addEventListener("dragstart", this.onDrag);
+          newCard.$el.addEventListener("dragend", this.onDragEnd);
+          newCard.$el.addEventListener("dragenter", this.onDragEnter);
+          newCard.$el.addEventListener("dragLeave", this.onDragLeave);
+          tabelCells[count].appendChild(newCard.$el);
+        }
+        count++;
       });
     },
     onDrag(e) {
-      requestAnimationFrame(function () {
+      requestAnimationFrame(function() {
         e.target.classList.add("hide");
       });
       e.dataTransfer.dropEffect = "move";
