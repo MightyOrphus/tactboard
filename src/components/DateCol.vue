@@ -161,8 +161,4 @@ export default {
   height: 100%;
   background-color: orange;
 }
-
-.hide {
-  transform: translateX(-9999px);
-}
 </style>

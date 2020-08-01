@@ -50,4 +50,8 @@ export default {
   margin: 0;
   border: 0;
 }
+
+.hide {
+  transform: translateX(-9999px);
+}
 </style>
