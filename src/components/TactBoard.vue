@@ -1,5 +1,6 @@
 <template>
   <div class="tactboard">
+    <TaskPopup class="taskPopup" ref="taskPopup"></TaskPopup>
     <div id="upperPart">
       <b-tabs id="inoutTab">
         <b-tab title="JiraInput">
@@ -17,9 +18,7 @@
               <input type="text" id="numOfDev" v-model="numOfDev" />
             </div>
             <div>
-              <label for="numOfTester"
-                >Number Of Tester(s) (not supported yet):</label
-              >
+              <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
               <input type="text" id="numOfTester" v-model="numOfTester" />
             </div>
             <div>
@@ -28,13 +27,7 @@
             </div>
           </div>
           <b-button v-on:click="processCSVFile" squared>Process CSV</b-button>
-          <b-button
-            v-on:click="clearBoard"
-            id="clearBoardButton"
-            squared
-            variant="dark"
-            >Clear</b-button
-          >
+          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
         <b-tab title="SaveFile" active>
           <div>
@@ -42,20 +35,8 @@
             <input type="file" id="jsonFileInput" />
           </div>
           <b-button v-on:click="importJSON" squared>Import</b-button>
-          <b-button
-            v-on:click="saveAsJSON"
-            id="saveAsButton"
-            squared
-            variant="primary"
-            >Export</b-button
-          >
-          <b-button
-            v-on:click="clearBoard"
-            id="clearBoardButton"
-            squared
-            variant="dark"
-            >Clear</b-button
-          >
+          <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
+          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
       </b-tabs>
       <template v-if="storyInfo.length">
@@ -82,15 +63,21 @@
 <script>
 import DateCol from "./DateCol.vue";
 import StoryList from "./StoryList.vue";
+import TaskPopup from "./TaskPopup.vue";
+import bus from "../bus.js";
 export default {
-  mounted: function() {
+  created: function () {
+    bus.$on("undateTaskPopup", this.undateTaskPopup);
+  },
+  mounted: function () {
     this.initStartDate();
   },
   components: {
     DateCol,
     StoryList,
+    TaskPopup,
   },
-  data: function() {
+  data: function () {
     return {
       allDatesInSprint: new Array(),
       hoursInOneDayPerPerson: 6,
@@ -105,7 +92,7 @@ export default {
     };
   },
   watch: {
-    tasksGroupedByDate: function() {
+    tasksGroupedByDate: function () {
       this.drawABoard(this.tasksGroupedByDate);
     },
   },
@@ -127,9 +114,10 @@ export default {
       );
     },
     clearBoard() {
-      this.allDatesInSprint = null;
+      this.allDatesInSprint = {};
       this.storyInfo = new Array();
-      document.getElementById("storyList").stories = this.storyInfo;
+      let storyListComponent = document.getElementById("storyList");
+      if (storyListComponent) storyListComponent.stories = this.storyInfo;
     },
     importJSON() {
       var inputFile = document.getElementById("jsonFileInput").files[0];
@@ -141,7 +129,7 @@ export default {
 
       var reader = new FileReader();
       var that = this;
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         that.allDatesInSprint = JSON.parse(event.target.result);
       };
       reader.readAsText(inputFile);
@@ -210,6 +198,7 @@ export default {
       this.setAllDatesInSprint(startDate, endDate, tasksGroupedByDate);
     },
     processCSVFile() {
+      this.clearBoard();
       var inputFile = document.getElementById("csvFileInput").files[0];
 
       if (!inputFile) {
@@ -219,7 +208,7 @@ export default {
 
       var reader = new FileReader();
       var that = this;
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         var fileContent = that.CSVToArray(event.target.result);
         var taskList = that.convertCVToTaskList([...fileContent]);
         that.removeSprintLevel(taskList, fileContent);
@@ -480,6 +469,10 @@ export default {
       //   isWorkDay: isWorkDay,
       // });
     },
+    undateTaskPopup(summary, oriEst) {
+      this.$refs.taskPopup.summary = summary;
+      this.$refs.taskPopup.oriEst = oriEst;
+    },
   },
 };
 </script>
@@ -515,5 +508,9 @@ button {
   display: table;
   height: 100vh;
   overflow: auto;
+}
+
+TaskPopup {
+  z-index: 50000;
 }
 </style>
