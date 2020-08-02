@@ -1,7 +1,7 @@
 <template>
-  <div v-bind:id="id" class="card noselect">
-    <p id="taskSummary">{{ summary }}</p>
-    <p id="taskDuration">{{ oriEst }}</p>
+  <div :id="id" class="card noselect">
+    <p id="taskSummary">{{ task.summary }}</p>
+    <p id="taskDuration">{{ task.oriEst }}</p>
   </div>
 </template>
 
@@ -9,16 +9,14 @@
 export default {
   props: {
     id: String,
-    summary: String,
-    color: String,
-    oriEst: Number,
+    task: Object,
   },
   mounted() {
     this.setBackgroundColor();
   },
   methods: {
     setBackgroundColor() {
-      this.$el.style.backgroundColor = this.color;
+      this.$el.style.backgroundColor = this.task.color;
     },
   },
 };

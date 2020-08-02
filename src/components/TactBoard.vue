@@ -72,8 +72,8 @@
         :isWorkDay="date.isWorkDay"
         :numOfDev="numOfDev"
         :numOfTester="numOfTester"
-        :emptyCell="date.emptyCell"
-        class="dateCol"
+        @taskDropped="saveCurrentState"
+        :ref="date.dateVal"
       ></DateCol>
     </div>
   </div>
@@ -101,6 +101,7 @@ export default {
       numOfTester: 1,
       sprintRange: 2,
       defaultHoursForUnestimatedTask: 6,
+      currentBoardState: null,
     };
   },
   watch: {
@@ -459,6 +460,26 @@ export default {
       // Return the parsed data.
       return arrData;
     },
+    saveCurrentState() {
+      console.log("saveCurrentState...");
+      this.currentBoardState = new Array();
+
+      // console.log(this.$el.querySelectorAll(".dateCol")[0].exportData());
+      for (var ref in this.$refs) {
+        console.log(this.$refs[ref]);
+        // console.log(this.$refs[ref]);
+      }
+      // :date="date.dateVal"
+      //   :tasks="date.tasks"
+      //   :isWorkDay="date.isWorkDay"
+      //   :numOfDev="numOfDev"
+      //   :numOfTester="numOfTester"
+      // this.allDatesInSprint.push({
+      //   tasks: tasksInDate,
+      //   dateVal: this.formatDate(new Date(dateHolder)),
+      //   isWorkDay: isWorkDay,
+      // });
+    },
   },
 };
 </script>
@@ -493,7 +514,6 @@ button {
 .flexbox {
   display: table;
   height: 100vh;
-
   overflow: auto;
 }
 </style>

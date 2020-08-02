@@ -55,6 +55,15 @@ export default {
   },
   components: {},
   methods: {
+    updateTaskList() {
+      this.tasks = new Array();
+      let tabelCells = this.$el.querySelectorAll(".tableCell");
+      tabelCells.forEach((cell) => {
+        console.log(cell);
+        console.log(cell.task);
+        // this.tasks.push(cell.task);
+      });
+    },
     addCard() {
       let tabelCells = this.$el.querySelectorAll(".tableCell");
       let count = 0;
@@ -63,19 +72,15 @@ export default {
           var ComponentClass = Vue.extend(Card);
           let newCard = new ComponentClass({
             propsData: {
-              key: task.issueId,
               id: task.issueId,
-              summary: task.summary,
-              oriEst: task.oriEst,
-              color: task.color,
+              task: task,
             },
           });
           newCard.$mount();
           newCard.$el.draggable = "true";
           newCard.$el.addEventListener("dragstart", this.onDrag);
           newCard.$el.addEventListener("dragend", this.onDragEnd);
-          newCard.$el.addEventListener("dragenter", this.onDragEnter);
-          newCard.$el.addEventListener("dragLeave", this.onDragLeave);
+          newCard.$el.addEventListener("drop", this.appendAfter);
           tabelCells[count].appendChild(newCard.$el);
         }
         count++;
@@ -87,17 +92,16 @@ export default {
       });
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("dragged_card_id", e.srcElement.id);
+      console.log(e.srcElement);
+      e.dataTransfer.setData("dragged_card", e.srcElement.id);
     },
-    onDragEnter(e) {
-      console.log("onDragEnter");
+    appendAfter(e) {
+      console.log("appendAfter");
       console.log(e);
-      // e.target.style.display = "none";
-    },
-    onDragLeave(e) {
-      console.log("onDragEnter");
-      console.log(e);
-      // e.target.style.display = "block";
+
+      // let card_id = e.dataTransfer.getData("dragged_card");
+      // console.log(card_id);
+      // console.log(e.target.parentNode);
     },
     onDragEnd(e) {
       e.target.classList.remove("hide");
@@ -109,9 +113,13 @@ export default {
         targetClasses &&
         targetClasses.toLowerCase().includes("dropallowed")
       ) {
-        let card_id = e.dataTransfer.getData("dragged_card_id");
+        let card_id = e.dataTransfer.getData("dragged_card");
         e.target.appendChild(document.getElementById(card_id));
+        this.$emit("taskDropped");
       }
+    },
+    exportData() {
+      console.log("exportData()");
     },
   },
 };
