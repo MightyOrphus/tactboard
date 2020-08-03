@@ -36,7 +36,7 @@ export default {
         let target = taskPopup[0];
         target.style.display = "block";
         target.style.left = x + "px";
-        target.style.top = y - 100 + "px";
+        target.style.top = y - 75 + "px";
         bus.$emit("undateTaskPopup", this.task.summary, this.task.oriEst);
       }
     },

@@ -160,14 +160,20 @@ export default {
       var reader = new FileReader();
       var that = this;
       reader.onload = function (event) {
-        that.allDatesInSprint = JSON.parse(event.target.result);
+        let fileContent = JSON.parse(event.target.result);
+        that.storyInfos = fileContent.story;
+        that.allDatesInSprint = fileContent.board;
       };
       reader.readAsText(inputFile);
     },
     saveAsJSON() {
       if (this.currentBoardState && this.currentBoardState.length > 0) {
-        var a = document.createElement("a");
-        var file = new Blob([JSON.stringify(this.currentBoardState)], {
+        let a = document.createElement("a");
+        let fileContent = {
+          story: this.storyInfos,
+          board: this.currentBoardState,
+        };
+        let file = new Blob([JSON.stringify(fileContent)], {
           type: "text/plain",
         });
         a.href = URL.createObjectURL(file);
