@@ -32,8 +32,9 @@
 <script>
 import Card from "./Card.vue";
 import Vue from "vue";
+
 export default {
-  mounted: function() {
+  mounted: function () {
     this.addCard();
     this.$el.style.zIndex = this.zIndex;
   },
@@ -55,14 +56,20 @@ export default {
   },
   components: {},
   methods: {
-    updateTaskList() {
-      this.tasks = new Array();
+    exportDate() {
+      let taskList = new Array();
       let tabelCells = this.$el.querySelectorAll(".tableCell");
       tabelCells.forEach((cell) => {
-        console.log(cell);
-        console.log(cell.task);
-        // this.tasks.push(cell.task);
+        let children = cell.childNodes;
+        if (children.length) {
+          taskList.push(children[0].id);
+        } else taskList.push({});
       });
+      return {
+        tasks: taskList,
+        dateVal: this.date,
+        isWorkDay: this.isWorkDay,
+      };
     },
     addCard() {
       let tabelCells = this.$el.querySelectorAll(".tableCell");
@@ -87,12 +94,11 @@ export default {
       });
     },
     onDrag(e) {
-      requestAnimationFrame(function() {
+      requestAnimationFrame(function () {
         e.target.classList.add("hide");
       });
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
-      console.log(e.srcElement);
       e.dataTransfer.setData("dragged_card", e.srcElement.id);
     },
     appendAfter(e) {
@@ -117,9 +123,6 @@ export default {
         e.target.appendChild(document.getElementById(card_id));
         this.$emit("taskDropped");
       }
-    },
-    exportData() {
-      console.log("exportData()");
     },
   },
 };

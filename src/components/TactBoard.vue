@@ -89,6 +89,7 @@ export default {
       sprintRange: 2,
       defaultHoursForUnestimatedTask: 6,
       currentBoardState: null,
+      allTasksStorage: {},
     };
   },
   watch: {
@@ -116,6 +117,7 @@ export default {
     clearBoard() {
       this.allDatesInSprint = {};
       this.storyInfo = new Array();
+      this.allTasksStorage = {};
       let storyListComponent = document.getElementById("storyList");
       if (storyListComponent) storyListComponent.stories = this.storyInfo;
     },
@@ -135,9 +137,9 @@ export default {
       reader.readAsText(inputFile);
     },
     saveAsJSON() {
-      if (this.allDatesInSprint && this.allDatesInSprint.length > 0) {
+      if (this.currentBoardState && this.currentBoardState.length > 0) {
         var a = document.createElement("a");
-        var file = new Blob([JSON.stringify(this.allDatesInSprint)], {
+        var file = new Blob([JSON.stringify(this.currentBoardState)], {
           type: "text/plain",
         });
         a.href = URL.createObjectURL(file);
@@ -288,6 +290,7 @@ export default {
               color: someRandomColor,
               parentId: parentId,
             };
+            this.allTasksStorage[taskObj.issueId] = taskObj;
             result.push(taskObj);
           }
         }
@@ -450,24 +453,23 @@ export default {
       return arrData;
     },
     saveCurrentState() {
-      console.log("saveCurrentState...");
       this.currentBoardState = new Array();
-
-      // console.log(this.$el.querySelectorAll(".dateCol")[0].exportData());
       for (var ref in this.$refs) {
-        console.log(this.$refs[ref]);
-        // console.log(this.$refs[ref]);
+        if (ref !== "taskPopup") {
+          let exportedDateData = this.$refs[ref][0].exportDate();
+          this.replaceIdWithTaskObject(exportedDateData);
+          this.currentBoardState.push(exportedDateData);
+        }
       }
-      // :date="date.dateVal"
-      //   :tasks="date.tasks"
-      //   :isWorkDay="date.isWorkDay"
-      //   :numOfDev="numOfDev"
-      //   :numOfTester="numOfTester"
-      // this.allDatesInSprint.push({
-      //   tasks: tasksInDate,
-      //   dateVal: this.formatDate(new Date(dateHolder)),
-      //   isWorkDay: isWorkDay,
-      // });
+    },
+    replaceIdWithTaskObject(exportedDateData) {
+      let tasks = exportedDateData.tasks;
+      for (let i = 0; i < tasks.length; i++) {
+        let item = tasks[i];
+        if (typeof item !== "object") {
+          tasks[i] = this.allTasksStorage[item];
+        }
+      }
     },
     undateTaskPopup(summary, oriEst) {
       this.$refs.taskPopup.summary = summary;
