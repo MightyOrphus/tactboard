@@ -4,41 +4,67 @@
     <div id="upperPart">
       <b-tabs id="inoutTab">
         <b-tab title="JiraInput">
-          <div id="inputForm">
-            <div id="myDateRange">
-              <label for="startDate">Start Date:</label>
-              <input type="date" id="startDate" format="yyyy-MM-dd" />
-            </div>
-            <div>
-              <label for="sprintRange">Sprint range (unit: week(s)):</label>
-              <input type="text" id="sprintRange" v-model="sprintRange" />
-            </div>
-            <div>
-              <label for="numOfDev">Number of Dev(s):</label>
-              <input type="text" id="numOfDev" v-model="numOfDev" />
-            </div>
-            <div>
-              <label
-                for="numOfTester"
-              >Number Of Tester(s) (not supported yet, please count tester with dev):</label>
-              <input type="text" id="numOfTester" v-model="numOfTester" />
-            </div>
-            <div>
-              <label>JIRA csv:</label>
-              <input type="file" id="csvFileInput" />
-            </div>
-          </div>
-          <b-button v-on:click="processCSVFile" squared>Process CSV</b-button>
-          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+          <b-container fluid id="csvInputForm">
+            <b-row>
+              <b-col sm="8">
+                <label for="startDate">Start Date:</label>
+              </b-col>
+              <b-col sm="4">
+                <b-form-input id="startDate" size="sm" type="date" format="yyyy-MM-dd" />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col sm="8">
+                <label for="sprintRange">Sprint range (unit: week(s)):</label>
+              </b-col>
+              <b-col sm="4">
+                <b-form-input id="sprintRange" size="sm" type="text" v-model="sprintRange" />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col sm="8">
+                <label for="numOfDev">Number of Dev(s):</label>
+              </b-col>
+              <b-col sm="4">
+                <b-form-input id="numOfDev" size="sm" type="text" v-model="numOfDev" />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col sm="8">
+                <label
+                  for="numOfTester"
+                >Number Of Tester(s) (not supported yet, please count as dev):</label>
+              </b-col>
+              <b-col sm="4">
+                <b-form-input id="numOfTester" size="sm" type="text" v-model="numOfTester" />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col sm="3">
+                <label for="csvFileInput">JIRA csv:</label>
+              </b-col>
+              <b-col sm="9">
+                <b-form-file id="csvFileInput" size="sm" />
+              </b-col>
+            </b-row>
+            <b-button v-on:click="processCSVFile" squared>Process CSV</b-button>
+            <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+          </b-container>
         </b-tab>
         <b-tab title="SaveFile" active>
-          <div>
-            <label>JSON file:</label>
-            <input type="file" id="jsonFileInput" />
-          </div>
-          <b-button v-on:click="importJSON" squared>Import</b-button>
-          <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
-          <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+          <b-container fluid id="jsonInputFile">
+            <b-row>
+              <b-col sm="3">
+                <label for="jsonFileInput">JSON file:</label>
+              </b-col>
+              <b-col sm="9">
+                <b-form-file id="jsonFileInput" size="sm" />
+              </b-col>
+            </b-row>
+            <b-button v-on:click="importJSON" squared>Import</b-button>
+            <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
+            <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+          </b-container>
         </b-tab>
       </b-tabs>
       <template v-if="storyInfos.length">
@@ -501,7 +527,12 @@ export default {
   border-color: black;
 }
 
-#inputForm {
+#csvInputForm {
+  padding: 5px;
+  font-size: 15px;
+}
+
+#jsonInputFile {
   padding: 5px;
 }
 
