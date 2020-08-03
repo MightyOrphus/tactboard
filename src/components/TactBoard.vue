@@ -271,7 +271,7 @@ export default {
         }
       }
       if (sprintLvlId) {
-        taskList.filter((task) => task.parentId != sprintLvlId);
+        this.taskList = taskList.filter((task) => task.parentId != sprintLvlId);
       }
     },
     randomColor() {
