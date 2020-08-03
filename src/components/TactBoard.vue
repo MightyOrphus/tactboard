@@ -18,7 +18,9 @@
               <input type="text" id="numOfDev" v-model="numOfDev" />
             </div>
             <div>
-              <label for="numOfTester">Number Of Tester(s) (not supported yet):</label>
+              <label
+                for="numOfTester"
+              >Number Of Tester(s) (not supported yet, please count tester with dev):</label>
               <input type="text" id="numOfTester" v-model="numOfTester" />
             </div>
             <div>
@@ -39,8 +41,8 @@
           <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
         </b-tab>
       </b-tabs>
-      <template v-if="storyInfo.length">
-        <StoryList id="storyList" :stories="this.storyInfo" />
+      <template v-if="storyInfos.length">
+        <StoryList id="storyList" :stories="this.storyInfos" />
       </template>
     </div>
     <div id="board" class="flexbox">
@@ -83,7 +85,7 @@ export default {
       hoursInOneDayPerPerson: 6,
       tasksGroupedByDate: {},
       hourInSecond: 3600,
-      storyInfo: new Array(),
+      storyInfos: new Array(),
       numOfDev: 3,
       numOfTester: 1,
       sprintRange: 2,
@@ -116,10 +118,10 @@ export default {
     },
     clearBoard() {
       this.allDatesInSprint = {};
-      this.storyInfo = new Array();
+      this.storyInfos = new Array();
       this.allTasksStorage = {};
       let storyListComponent = document.getElementById("storyList");
-      if (storyListComponent) storyListComponent.stories = this.storyInfo;
+      if (storyListComponent) storyListComponent.stories = this.storyInfos;
     },
     importJSON() {
       var inputFile = document.getElementById("jsonFileInput").files[0];
@@ -213,6 +215,10 @@ export default {
       reader.onload = function (event) {
         var fileContent = that.CSVToArray(event.target.result);
         var taskList = that.convertCVToTaskList([...fileContent]);
+        that.storyInfos = that.storyInfos.filter(
+          (storyInfo) =>
+            !storyInfo.summary.toLowerCase().includes("sprint level")
+        );
         that.removeSprintLevel(taskList, fileContent);
         that.tasksGroupedByDate = that.distributeTasksToDate(taskList);
       };
@@ -268,7 +274,7 @@ export default {
           // random new color when parent issue change...
           someRandomColor = this.randomColor();
           if (line[sumIdx]) {
-            this.storyInfo.push({
+            this.storyInfos.push({
               summary: line[sumIdx],
               issueId: line[issueIdIdx],
               issueKey: line[issueKeyIdx],
@@ -277,7 +283,10 @@ export default {
           }
         } else {
           // task line
-          if (line[accountIdx].includes("FSG20")) {
+          if (
+            line[accountIdx].includes("FSG20") ||
+            line[accountIdx].includes("FSG25")
+          ) {
             // currently get only development task
             // QA task scenario is wait for implemented.
             var parentId = line[parentIssueIdx];
