@@ -282,7 +282,7 @@ export default {
         "," +
         (25 + 70 * Math.random()) +
         "%," +
-        (75 + 20 * Math.random()) +
+        (65 + 30 * Math.random()) +
         "%)"
       );
     },
