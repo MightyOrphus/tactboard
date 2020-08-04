@@ -104,10 +104,6 @@ export default {
     appendAfter(e) {
       console.log("appendAfter");
       console.log(e);
-
-      // let card_id = e.dataTransfer.getData("dragged_card");
-      // console.log(card_id);
-      // console.log(e.target.parentNode);
     },
     onDragEnd(e) {
       e.target.classList.remove("hide");
@@ -139,7 +135,7 @@ export default {
 
 .dateCol {
   display: table-cell;
-  background-color: var(--backgrounds-3-hex);
+  /* background-color: var(--backgrounds-3-hex); */
   border-right: 2px groove black;
   border-top: 2px groove black;
   position: relative;

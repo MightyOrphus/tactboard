@@ -160,13 +160,23 @@ export default {
       var reader = new FileReader();
       var that = this;
       reader.onload = function (event) {
+        this.allTasksStorage = {};
         let fileContent = JSON.parse(event.target.result);
+        fileContent.board.forEach((day) => {
+          day.tasks.forEach((task) => {
+            console.log(task);
+            if (task && Object.keys(task).length > 0)
+              this.allTasksStorage[task.issueId] = task;
+          });
+        });
+        console.log(this.allTasksStorage);
         that.storyInfos = fileContent.story;
         that.allDatesInSprint = fileContent.board;
       };
       reader.readAsText(inputFile);
     },
     saveAsJSON() {
+      this.saveCurrentState();
       if (this.currentBoardState && this.currentBoardState.length > 0) {
         let a = document.createElement("a");
         let fileContent = {
@@ -270,9 +280,7 @@ export default {
           break;
         }
       }
-      if (sprintLvlId) {
-        this.taskList = taskList.filter((task) => task.parentId != sprintLvlId);
-      }
+      if (sprintLvlId) taskList.filter((task) => task.parentId !== sprintLvlId);
     },
     randomColor() {
       // cr. https://stackoverflow.com/questions/43193341/how-to-generate-random-pastel-or-brighter-color-in-javascript
@@ -319,29 +327,28 @@ export default {
             line[accountIdx].includes("FSG20") ||
             line[accountIdx].includes("FSG25")
           ) {
-            // currently get only development task
-            // QA task scenario is wait for implemented.
-            var parentId = line[parentIssueIdx];
-            var taskObj = {
-              summary: line[sumIdx],
-              issueId: line[issueIdIdx],
-              issueKey: line[issueKeyIdx],
-              oriEst: this.toHour(line[orgEstIdx]),
-              type: line[issueTypeIdx],
-              color: someRandomColor,
-              parentId: parentId,
-            };
-            this.allTasksStorage[taskObj.issueId] = taskObj;
-            result.push(taskObj);
+            let oriEst = parseInt(line[orgEstIdx]);
+            if (oriEst > 0) {
+              var parentId = line[parentIssueIdx];
+              var taskObj = {
+                summary: line[sumIdx],
+                issueId: line[issueIdIdx],
+                issueKey: line[issueKeyIdx],
+                oriEst: this.toHour(oriEst),
+                type: line[issueTypeIdx],
+                color: someRandomColor,
+                parentId: parentId,
+              };
+              this.allTasksStorage[taskObj.issueId] = taskObj;
+              result.push(taskObj);
+            }
           }
         }
       }
       return result;
     },
     toHour(second) {
-      if (second && second.length)
-        return Math.floor(second / this.hourInSecond);
-      else return this.defaultHoursForUnestimatedTask;
+      return Math.floor(second / this.hourInSecond);
     },
     distributeTasksToDate(taskList) {
       let tasksGroupedByDate = new Array();
