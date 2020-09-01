@@ -254,7 +254,7 @@ export default {
       var that = this;
       reader.onload = function (event) {
         var fileContent = that.CSVToArray(event.target.result);
-        var taskList = that.convertCVToTaskList([...fileContent]);
+        var taskList = that.convertCSVToTaskList([...fileContent]);
         that.storyInfos = that.storyInfos.filter(
           (storyInfo) =>
             !storyInfo.summary.toLowerCase().includes("sprint level")
@@ -292,7 +292,7 @@ export default {
         "%)"
       );
     },
-    convertCVToTaskList(fileContent) {
+    convertCSVToTaskList(fileContent) {
       var result = new Array();
       var headers = fileContent.shift();
       var parentIssueIdx = headers.indexOf("Parent id");
