@@ -160,16 +160,14 @@ export default {
       var reader = new FileReader();
       var that = this;
       reader.onload = function (event) {
-        this.allTasksStorage = {};
+        that.allTasksStorage = {};
         let fileContent = JSON.parse(event.target.result);
         fileContent.board.forEach((day) => {
           day.tasks.forEach((task) => {
-            console.log(task);
             if (task && Object.keys(task).length > 0)
-              this.allTasksStorage[task.issueId] = task;
+              that.allTasksStorage[task.issueId] = task;
           });
         });
-        console.log(this.allTasksStorage);
         that.storyInfos = fileContent.story;
         that.allDatesInSprint = fileContent.board;
       };
