@@ -126,7 +126,7 @@ export default {
 
 <style scoped>
 #header {
-  width: 150px;
+  width: 170px;
   border-bottom: groove black;
   font-size: 20px;
   text-align: center;
@@ -139,21 +139,21 @@ export default {
   border-right: 2px groove black;
   border-top: 2px groove black;
   position: relative;
-  width: 150px;
+  width: 170px;
   position: relative;
   overflow: visible;
 }
 
 .cellPair {
   height: 150px;
-  width: 75px;
+  width: 85px;
   position: relative;
   overflow: visible;
 }
 
 .tableCell {
   height: 150px;
-  width: 75px;
+  width: 85px;
   padding: 0;
   margin: 0;
   border-bottom: 2px groove black;

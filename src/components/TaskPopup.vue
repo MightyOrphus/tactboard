@@ -17,7 +17,7 @@ export default {
 </script>
 <style scoped>
 .tooltip {
-  width: 150px;
+  width: 170px;
   z-index: 50000;
   color: white;
   background-color: black;
