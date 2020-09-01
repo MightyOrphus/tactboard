@@ -25,7 +25,6 @@ export default {
 }
 
 #app {
-  background-color: var(--backgrounds-1-hex);
   /* font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
