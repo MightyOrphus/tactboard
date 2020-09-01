@@ -74,6 +74,8 @@ export default {
 }
 
 #taskDuration {
+  text-align: right;
+  padding-right: 5px;
   margin: 0;
   border: 0;
 }
