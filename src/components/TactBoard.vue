@@ -336,20 +336,18 @@ export default {
             line[accountIdx].includes("FSG25")
           ) {
             let oriEst = parseInt(line[orgEstIdx]);
-            if (oriEst > 0) {
-              var parentId = line[parentIssueIdx];
-              var taskObj = {
-                summary: line[sumIdx],
-                issueId: line[issueIdIdx],
-                issueKey: line[issueKeyIdx],
-                oriEst: this.toHour(oriEst),
-                type: line[issueTypeIdx],
-                color: someRandomColor,
-                parentId: parentId,
-              };
-              this.allTasksStorage[taskObj.issueId] = taskObj;
-              result.push(taskObj);
-            }
+            var parentId = line[parentIssueIdx];
+            var taskObj = {
+              summary: line[sumIdx],
+              issueId: line[issueIdIdx],
+              issueKey: line[issueKeyIdx],
+              oriEst: this.toHour(oriEst),
+              type: line[issueTypeIdx],
+              color: someRandomColor,
+              parentId: parentId,
+            };
+            this.allTasksStorage[taskObj.issueId] = taskObj;
+            result.push(taskObj);
           }
         }
       }
