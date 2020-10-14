@@ -333,7 +333,8 @@ export default {
           // task line
           if (
             line[accountIdx].includes("FSG20") ||
-            line[accountIdx].includes("FSG25")
+            line[accountIdx].includes("FSG25") ||
+            line[accountIdx].includes("FSG30")
           ) {
             let oriEst = parseInt(line[orgEstIdx]);
             var parentId = line[parentIssueIdx];
