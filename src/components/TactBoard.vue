@@ -10,7 +10,12 @@
                 <label for="startDate">Start Date:</label>
               </b-col>
               <b-col sm="4">
-                <b-form-input id="startDate" size="sm" type="date" format="yyyy-MM-dd" />
+                <b-form-input
+                  id="startDate"
+                  size="sm"
+                  type="date"
+                  format="yyyy-MM-dd"
+                />
               </b-col>
             </b-row>
             <b-row>
@@ -18,25 +23,12 @@
                 <label for="sprintRange">Sprint range (unit: week(s)):</label>
               </b-col>
               <b-col sm="4">
-                <b-form-input id="sprintRange" size="sm" type="text" v-model="sprintRange" />
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col sm="8">
-                <label for="numOfDev">Number of Dev(s):</label>
-              </b-col>
-              <b-col sm="4">
-                <b-form-input id="numOfDev" size="sm" type="text" v-model="numOfDev" />
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col sm="8">
-                <label
-                  for="numOfTester"
-                >Number Of Tester(s) (not supported yet, please count as dev):</label>
-              </b-col>
-              <b-col sm="4">
-                <b-form-input id="numOfTester" size="sm" type="text" v-model="numOfTester" />
+                <b-form-input
+                  id="sprintRange"
+                  size="sm"
+                  type="text"
+                  v-model="sprintRange"
+                />
               </b-col>
             </b-row>
             <b-row>
@@ -48,7 +40,13 @@
               </b-col>
             </b-row>
             <b-button v-on:click="processCSVFile" squared>Process CSV</b-button>
-            <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+            <b-button
+              v-on:click="clearBoard"
+              id="clearBoardButton"
+              squared
+              variant="dark"
+              >Clear</b-button
+            >
           </b-container>
         </b-tab>
         <b-tab title="SaveFile" active>
@@ -62,8 +60,20 @@
               </b-col>
             </b-row>
             <b-button v-on:click="importJSON" squared>Import</b-button>
-            <b-button v-on:click="saveAsJSON" id="saveAsButton" squared variant="primary">Export</b-button>
-            <b-button v-on:click="clearBoard" id="clearBoardButton" squared variant="dark">Clear</b-button>
+            <b-button
+              v-on:click="saveAsJSON"
+              id="saveAsButton"
+              squared
+              variant="primary"
+              >Export</b-button
+            >
+            <b-button
+              v-on:click="clearBoard"
+              id="clearBoardButton"
+              squared
+              variant="dark"
+              >Clear</b-button
+            >
           </b-container>
         </b-tab>
       </b-tabs>
@@ -350,66 +360,21 @@ export default {
     },
     distributeTasksToDate(taskList) {
       let tasksGroupedByDate = new Array();
-      if (taskList && taskList.length) {
-        let possibleHoursInOneDay = this.hoursInOneDayPerPerson * this.numOfDev;
-
-        let currentDate = {
-          remainingHours: possibleHoursInOneDay,
-          tasks: new Array(),
-        };
-
-        let hourDebts = new Array();
-        let maxDebtPerDay = possibleHoursInOneDay;
-        let task;
-
-        while (taskList.length) {
-          task = taskList.shift();
-
-          if (this.hoursInOneDayPerPerson >= task.oriEst) {
-            if (task.oriEst > currentDate.remainingHours) {
-              this.addHourDebt(
-                hourDebts,
-                maxDebtPerDay,
-                task.oriEst - currentDate.remainingHours
-              );
-            }
-            currentDate.remainingHours -= task.oriEst;
-            currentDate.tasks.push(task);
-          } else {
-            if (currentDate.remainingHours >= this.hoursInOneDayPerPerson) {
-              this.addHourDebt(
-                hourDebts,
-                maxDebtPerDay,
-                task.oriEst - this.hoursInOneDayPerPerson
-              );
-            } else {
-              this.addHourDebt(
-                hourDebts,
-                maxDebtPerDay,
-                task.oriEst - currentDate.remainingHours
-              );
-            }
-            currentDate.remainingHours -= this.hoursInOneDayPerPerson;
-            currentDate.tasks.push(task);
-          }
-
-          if (currentDate.remainingHours <= 0) {
-            let copiedDate = currentDate;
-            tasksGroupedByDate.push(copiedDate);
-            let hourDebtForCurrentDate = hourDebts.shift();
-            currentDate = {
-              remainingHours: possibleHoursInOneDay - hourDebtForCurrentDate,
-              tasks: new Array(),
-            };
-            // ceil() if there is an numerator after a dividing process (ex. debt 1 hr from yesterday = ceil to 1 cell)
-            let emptyCell = Math.ceil(
-              hourDebtForCurrentDate / (this.hoursInOneDayPerPerson / 2)
-            );
-            if (emptyCell > 0) {
-              for (let i = 0; i < emptyCell; i++) currentDate.tasks.push({});
-            }
-          }
+      let currentDate = {
+        tasks: new Array(),
+      };
+      console.log(taskList.length);
+      let count = 0;
+      while (taskList.length) {
+        console.log(count++);
+        if (currentDate.tasks.length == 6) {
+          tasksGroupedByDate.push(currentDate);
+          currentDate = {
+            tasks: new Array(),
+          };
         }
+        let task = taskList.shift();
+        currentDate.tasks.push(task);
       }
       return tasksGroupedByDate;
     },
