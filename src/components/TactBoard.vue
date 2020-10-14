@@ -363,10 +363,7 @@ export default {
       let currentDate = {
         tasks: new Array(),
       };
-      console.log(taskList.length);
-      let count = 0;
       while (taskList.length) {
-        console.log(count++);
         if (currentDate.tasks.length == 6) {
           tasksGroupedByDate.push(currentDate);
           currentDate = {
