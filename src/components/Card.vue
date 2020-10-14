@@ -58,7 +58,7 @@ export default {
 .card {
   width: 85px;
   height: 148px;
-  font-size: 15px;
+  font-size: 13px;
   position: absolute;
 }
 
